@@ -14,7 +14,7 @@ window.HCTK_VARIANT_CONFIG = {
     "nextDueLoading": "Next card: loading...",
     "defaultPrompt": "Placeholder question",
     "noDueHeading": "No learning card due today",
-    "noDueBody": "Cards are available only on their scheduled due date through 11:59 PM Central Time.",
+    "noDueBody": "",
     "blockedHeading": "No learning card due from this link",
     "blockedBody": "This calendar link is outside its scheduled participant due window. Cards are available only during their scheduled due window.",
     "calendarInvalidBody": "Regenerate the matching calendar or open a valid activity link.",

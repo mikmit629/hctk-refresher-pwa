@@ -7,7 +7,7 @@ const HCTK_LABELS = {
   nextDueLoading: 'Next card: loading...',
   defaultPrompt: 'Placeholder question',
   noDueHeading: 'No learning card due today',
-  noDueBody: 'Cards are available only on their scheduled due date through 11:59 PM Central Time.',
+  noDueBody: '',
   blockedHeading: 'No learning card due from this link',
   blockedBody: 'This calendar link is outside its scheduled participant due window. Cards are available only during their scheduled due window.',
   calendarInvalidBody: 'Regenerate the matching calendar or open a valid activity link.',
@@ -95,6 +95,7 @@ const elements = {
   contentPrompt: document.querySelector('#contentPrompt'),
   answerChoices: document.querySelector('#answerChoices'),
   feedbackBox: document.querySelector('#feedbackBox'),
+  sourceAttributions: document.querySelector('#sourceAttributions'),
   completeButton: document.querySelector('#completeButton'),
   participantFormLinkBox: document.querySelector('#participantFormLinkBox'),
   participantCompletionFormLink: document.querySelector('#participantCompletionFormLink'),
@@ -600,6 +601,7 @@ function renderLearningCard() {
   const participantCompleted = participantInteract && Boolean(completionEvent);
   elements.completeButton.classList.toggle('hidden', !participantInteract || participantCompleted);
   renderParticipantCompletionLink(item, participantCompleted ? completionEvent : null);
+  renderSourceAttributions(content, participantCompleted);
 
   const choices = Array.isArray(content.choices) ? content.choices : [];
   if (choices.length) {
@@ -770,6 +772,7 @@ function renderNoDueState() {
   elements.cardMeta.textContent = `Today in Central Time: ${formatDisplayDate(todayChicagoISODate())}`;
 
   if (!heading || !body) return;
+  body.classList.remove('hidden');
 
   if (status?.kind === 'invalid') {
     heading.textContent = 'Calendar link not recognized';
@@ -785,6 +788,7 @@ function renderNoDueState() {
 
   heading.textContent = HCTK_LABELS.noDueHeading;
   body.textContent = HCTK_LABELS.noDueBody;
+  body.classList.toggle('hidden', !HCTK_LABELS.noDueBody);
 }
 
 function renderParticipantCompletionLink(item, completionEvent) {
@@ -797,6 +801,57 @@ function renderParticipantCompletionLink(item, completionEvent) {
   const url = completionEvent.completionFormUrl || buildCompletionFormUrl(completionEvent.timestamp, item);
   elements.participantFormLinkBox.classList.remove('hidden');
   elements.participantCompletionFormLink.href = url;
+}
+
+function renderSourceAttributions(content, show) {
+  if (!elements.sourceAttributions) return;
+  elements.sourceAttributions.innerHTML = '';
+
+  const references = citationReferenceLines(content);
+  if (!show || !references.length) {
+    elements.sourceAttributions.classList.add('hidden');
+    return;
+  }
+
+  const heading = document.createElement('h4');
+  heading.textContent = 'Sources';
+  const list = document.createElement('ol');
+  references.forEach((reference) => {
+    const item = document.createElement('li');
+    appendLinkedText(item, reference);
+    list.appendChild(item);
+  });
+
+  elements.sourceAttributions.append(heading, list);
+  elements.sourceAttributions.classList.remove('hidden');
+}
+
+function citationReferenceLines(content) {
+  return String(content?.citationReferences || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function appendLinkedText(element, text) {
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  let lastIndex = 0;
+  String(text || '').replace(urlPattern, (match, _unused, offset) => {
+    if (offset > lastIndex) {
+      element.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+    }
+    const link = document.createElement('a');
+    link.href = match;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = match;
+    element.appendChild(link);
+    lastIndex = offset + match.length;
+    return match;
+  });
+  if (lastIndex < text.length) {
+    element.appendChild(document.createTextNode(text.slice(lastIndex)));
+  }
 }
 
 function renderNextDueMeta() {

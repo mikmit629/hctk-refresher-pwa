@@ -14,7 +14,7 @@ window.HCTK_VARIANT_CONFIG = {
     "nextDueLoading": "Next activity: loading...",
     "defaultPrompt": "Placeholder question",
     "noDueHeading": "No study activity due today",
-    "noDueBody": "Activities are available only on their scheduled due date through 11:59 PM Central Time.",
+    "noDueBody": "",
     "blockedHeading": "No study activity due from this link",
     "blockedBody": "This calendar link is outside its scheduled participant due window. Activities are available only during their scheduled due window.",
     "calendarInvalidBody": "Regenerate the matching calendar or open a valid activity link.",
