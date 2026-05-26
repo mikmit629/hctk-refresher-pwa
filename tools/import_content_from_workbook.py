@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Import HCTK activity content from the calendar-notification workbook.
-
-The spreadsheet remains the editing surface. This script turns the two activity
-tabs into the CONTENT_BANK arrays used by the intervention and control PWAs.
-"""
+"""Import HCTK activity content into the refresher PWA."""
 
 from __future__ import annotations
 
@@ -20,133 +16,143 @@ from openpyxl import load_workbook
 SCRIPT_DIR = Path(__file__).resolve().parent
 APP_DIR = SCRIPT_DIR.parent
 CODING_DIR = APP_DIR.parent
-DEFAULT_WORKBOOK = CODING_DIR / "HCTK Calendar Notification Content Map.xlsx"
+DEFAULT_WORKBOOK = CODING_DIR / "hctk_refresher_activities_26_draft.xlsx"
 DEFAULT_INTERVENTION_APP = APP_DIR / "app.js"
 DEFAULT_CONTROL_APP = APP_DIR / "control" / "app.js"
 ACTIVITY_COUNT = 26
+SHEET_NAME = "Refresher Activities"
+CHOICE_KEYS = ["choice_a", "choice_b", "choice_c", "choice_d"]
+TARGETS = {
+    "intervention": {
+        "path": DEFAULT_INTERVENTION_APP,
+        "id_prefix": "content",
+    },
+    "control": {
+        "path": DEFAULT_CONTROL_APP,
+        "id_prefix": "control-content",
+    },
+}
+REQUIRED_HEADERS = [
+    "activity_id / calendar sequence",
+    "format / card type",
+    "focus / card topic",
+    "title / calendar summary",
+    "detail / calendar description",
+    "media / card asset",
+    "choice_a",
+    "choice_b",
+    "choice_c",
+    "choice_d",
+    "correct_choice",
+    "rationale / card feedback",
+    "citation_numbers",
+    "citation_references",
+]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Transfer HCTK workbook activity rows into the PWA CONTENT_BANK arrays."
+        description="Transfer HCTK workbook activity rows into the PWA CONTENT_BANK array."
     )
     parser.add_argument("--workbook", type=Path, default=DEFAULT_WORKBOOK)
+    parser.add_argument("--target", choices=sorted(TARGETS), default="intervention")
     parser.add_argument("--intervention-app", type=Path, default=DEFAULT_INTERVENTION_APP)
     parser.add_argument("--control-app", type=Path, default=DEFAULT_CONTROL_APP)
+    parser.add_argument("--app", type=Path, help="Override the target app.js path.")
     parser.add_argument("--dry-run", action="store_true", help="Validate and report without writing app files.")
     args = parser.parse_args()
 
     workbook_path = args.workbook.expanduser().resolve()
     if not workbook_path.exists():
-      raise SystemExit(f"Workbook not found: {workbook_path}")
+        raise SystemExit(f"Workbook not found: {workbook_path}")
 
     workbook = load_workbook(workbook_path, data_only=False)
-    intervention = read_activity_sheet(workbook, "Intervention Activities", "content")
-    control = read_activity_sheet(workbook, "Control Activities", "control-content")
-    version = content_version(intervention, control)
+    target = TARGETS[args.target]
+    rows = read_refresher_sheet(workbook, target["id_prefix"])
+    version = content_version(rows, args.target)
 
-    targets = [
-        ("intervention", args.intervention_app.expanduser().resolve(), intervention),
-        ("hosted control", args.control_app.expanduser().resolve(), control),
-    ]
-
-    for label, path, rows in targets:
-        if not path.exists():
-            print(f"Skipped {label}: {path} does not exist")
-            continue
-        next_text = replace_app_content(path.read_text(), rows, version)
-        changed = next_text != path.read_text()
-        if args.dry_run:
-            print(f"Would update {label}: {path} ({len(rows)} activities, version {version}, changed={changed})")
-        elif changed:
-            path.write_text(next_text)
-            print(f"Updated {label}: {path} ({len(rows)} activities, version {version})")
-        else:
-            print(f"No content changes for {label}: {path} ({len(rows)} activities, version {version})")
+    path = target_app_path(args).expanduser().resolve()
+    if not path.exists():
+        raise SystemExit(f"App file not found: {path}")
+    source = path.read_text(encoding="utf-8")
+    next_text = replace_app_content(source, rows, version)
+    changed = next_text != source
+    if args.dry_run:
+        print(f"Would update {args.target}: {path} ({len(rows)} activities, version {version}, changed={changed})")
+    elif changed:
+        path.write_text(next_text, encoding="utf-8")
+        print(f"Updated {args.target}: {path} ({len(rows)} activities, version {version})")
+    else:
+        print(f"No content changes for {args.target}: {path} ({len(rows)} activities, version {version})")
 
 
-def read_activity_sheet(workbook: Any, sheet_name: str, default_id_prefix: str) -> list[dict[str, Any]]:
-    if sheet_name not in workbook.sheetnames:
-        raise SystemExit(f"Required sheet missing: {sheet_name}")
+def target_app_path(args: argparse.Namespace) -> Path:
+    if args.app:
+        return args.app
+    if args.target == "control":
+        return args.control_app
+    return args.intervention_app
 
-    sheet = workbook[sheet_name]
+
+def read_refresher_sheet(workbook: Any, id_prefix: str) -> list[dict[str, Any]]:
+    if SHEET_NAME not in workbook.sheetnames:
+        raise SystemExit(f"Required sheet missing: {SHEET_NAME}")
+
+    sheet = workbook[SHEET_NAME]
     headers = {
         normalize_header(cell.value): index + 1
         for index, cell in enumerate(sheet[1])
         if normalize_header(cell.value)
     }
-    required = [
-        "activity_number",
-        "content_id",
-        "format",
-        "focus",
-        "title",
-        "prompt_or_question",
-        "calendar_fact_or_fact_text",
-        "correct_choice_index",
-        "rationale",
-    ]
-    missing = [name for name in required if name not in headers]
+    missing = [name for name in REQUIRED_HEADERS if name not in headers]
     if missing:
-        raise SystemExit(f"{sheet_name} missing required columns: {', '.join(missing)}")
+        raise SystemExit(f"{SHEET_NAME} missing required columns: {', '.join(missing)}")
 
     rows: list[dict[str, Any]] = []
-    for row_number in range(2, ACTIVITY_COUNT + 2):
-        activity_number = cell_text(sheet, headers, row_number, "activity_number")
-        if not activity_number:
+    for row_number in range(2, sheet.max_row + 1):
+        activity_id = cell_text(sheet, headers, row_number, "activity_id / calendar sequence")
+        if not activity_id and row_is_empty(sheet, row_number, len(headers)):
             continue
-        try:
-            sequence = int(float(activity_number))
-        except ValueError as exc:
-            raise SystemExit(f"{sheet_name} row {row_number}: activity_number must be numeric") from exc
-        if sequence < 1 or sequence > ACTIVITY_COUNT:
-            continue
+        sequence = parse_activity_sequence(activity_id, row_number)
+        content_format = cell_text(sheet, headers, row_number, "format / card type")
+        validate_format(content_format, row_number)
 
         choices = [
-            cell_text(sheet, headers, row_number, name)
-            for name in ["choice_a", "choice_b", "choice_c", "choice_d"]
-            if name in headers and cell_text(sheet, headers, row_number, name)
+            cell_text(sheet, headers, row_number, name) for name in CHOICE_KEYS
         ]
-        correct_index = parse_correct_index(
-            cell_text(sheet, headers, row_number, "correct_choice_index"),
-            choices,
-            sheet_name,
-            row_number,
-        )
-        content_format = cell_text(sheet, headers, row_number, "format") or "Learning Card"
-        calendar_fact = cell_text(sheet, headers, row_number, "calendar_fact_or_fact_text")
-        prompt = cell_text(sheet, headers, row_number, "prompt_or_question")
-        if not choices and not is_question_format(content_format) and not prompt:
-            prompt = calendar_fact
-
-        legacy_image = cell_text(sheet, headers, row_number, "image_path")
-        media_path = cell_text(sheet, headers, row_number, "media_path") or legacy_image or "assets/blank-card.svg"
-        media_type = normalize_media_type(
-            cell_text(sheet, headers, row_number, "media_type") or infer_media_type(media_path)
-        )
-        media_alt = cell_text(sheet, headers, row_number, "media_alt")
-        content_id = cell_text(sheet, headers, row_number, "content_id") or f"{default_id_prefix}-{sequence:03d}"
+        correct_choice = cell_text(sheet, headers, row_number, "correct_choice")
+        rationale = cell_text(sheet, headers, row_number, "rationale / card feedback")
+        correct_index = validate_card_fields(content_format, choices, correct_choice, rationale, row_number)
+        if content_format == "Question":
+            rationale = clean_rationale(rationale)
+        media_path = cell_text(sheet, headers, row_number, "media / card asset")
+        media_type = infer_media_type(media_path) if media_path else ""
         rows.append({
-            "id": content_id,
+            "id": f"{id_prefix}-{sequence:03d}",
+            "activityId": activity_id,
+            "sequence": sequence,
             "format": content_format,
-            "focus": cell_text(sheet, headers, row_number, "focus") or "Generic",
-            "title": cell_text(sheet, headers, row_number, "title") or f"Activity {sequence}",
-            "prompt": prompt,
+            "focus": cell_text(sheet, headers, row_number, "focus / card topic"),
+            "title": cell_text(sheet, headers, row_number, "title / calendar summary"),
+            "prompt": cell_text(sheet, headers, row_number, "detail / calendar description"),
             "mediaType": media_type,
             "mediaPath": media_path,
-            "mediaAlt": media_alt or f"{cell_text(sheet, headers, row_number, 'focus') or 'Activity'} media",
-            "image": media_path if media_type != "link" else "assets/blank-card.svg",
-            "choices": choices,
+            "mediaAlt": "",
+            "image": media_path if media_type and media_type != "link" else "",
+            "choices": [choice for choice in choices if choice],
             "correctIndex": correct_index,
-            "rationale": cell_text(sheet, headers, row_number, "rationale"),
-            "calendarFact": calendar_fact,
+            "rationale": rationale,
+            "citationNumbers": cell_text(sheet, headers, row_number, "citation_numbers"),
+            "citationReferences": cell_text(sheet, headers, row_number, "citation_references"),
         })
 
-    rows.sort(key=lambda item: content_sort_key(item["id"]))
+    rows.sort(key=lambda item: item["sequence"])
     if len(rows) != ACTIVITY_COUNT:
-        raise SystemExit(f"{sheet_name} must contain exactly {ACTIVITY_COUNT} activities; found {len(rows)}")
+        raise SystemExit(f"{SHEET_NAME} must contain exactly {ACTIVITY_COUNT} activities; found {len(rows)}")
     if len({row["id"] for row in rows}) != ACTIVITY_COUNT:
-        raise SystemExit(f"{sheet_name} content_id values must be unique")
+        raise SystemExit("Generated content ids must be unique")
+    if [row["sequence"] for row in rows] != list(range(1, ACTIVITY_COUNT + 1)):
+        raise SystemExit(f"{SHEET_NAME} must contain activity ids 1/26 through 26/26")
     return rows
 
 
@@ -164,29 +170,71 @@ def cell_text(sheet: Any, headers: dict[str, int], row_number: int, name: str) -
     return str(value).replace("\r\n", "\n").replace("\r", "\n").strip()
 
 
-def parse_correct_index(value: str, choices: list[str], sheet_name: str, row_number: int) -> int:
-    if not choices:
+def row_is_empty(sheet: Any, row_number: int, max_column: int) -> bool:
+    for column in range(1, max_column + 1):
+        value = sheet.cell(row=row_number, column=column).value
+        if value is not None and str(value).strip():
+            return False
+    return True
+
+
+def parse_activity_sequence(value: str, row_number: int) -> int:
+    match = re.fullmatch(r"(\d+)\s*/\s*26", value)
+    if not match:
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: activity_id / calendar sequence must use N/26")
+    sequence = int(match.group(1))
+    if sequence < 1 or sequence > ACTIVITY_COUNT:
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: activity sequence is outside 1/26 through 26/26")
+    return sequence
+
+
+def validate_format(value: str, row_number: int) -> None:
+    if value not in {"Fact", "Question"}:
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: format / card type must be Fact or Question")
+
+
+def validate_card_fields(
+    content_format: str,
+    choices: list[str],
+    correct_choice: str,
+    rationale: str,
+    row_number: int,
+) -> int:
+    if content_format == "Fact":
+        if any(choices) or correct_choice or rationale:
+            raise SystemExit(f"{SHEET_NAME} row {row_number}: Fact rows must not include choices, correct choice, or rationale")
         return 0
-    if not value:
-        return 0
-    try:
-        one_based = int(float(value))
-    except ValueError as exc:
-        raise SystemExit(f"{sheet_name} row {row_number}: correct_choice_index must be numeric") from exc
-    if one_based < 1 or one_based > len(choices):
-        raise SystemExit(
-            f"{sheet_name} row {row_number}: correct_choice_index {one_based} is outside available choices"
-        )
-    return one_based - 1
+
+    if not all(choices):
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: Question rows must include choices A through D")
+    if correct_choice not in {"a", "b", "c", "d"}:
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: correct_choice must be lowercase a, b, c, or d")
+    if not rationale:
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: Question rows must include rationale / card feedback")
+    return {"a": 0, "b": 1, "c": 2, "d": 3}[correct_choice]
 
 
-def is_question_format(value: str) -> bool:
-    return bool(re.search(r"question|quiz|check", value, re.IGNORECASE))
+def clean_rationale(value: str) -> str:
+    lines = [line.strip() for line in value.splitlines() if line.strip()]
+    has_choice_list = sum(1 for line in lines if rationale_choice_line(line)) >= 2
+    cleaned: list[str] = []
+
+    for line in lines:
+        if has_choice_list and re.match(r"^Correct answer:\s*[A-D]\b", line, flags=re.IGNORECASE):
+            continue
+        match = rationale_choice_line(line)
+        if match:
+            label = match.group(1).upper()
+            detail = re.sub(r"^Correct\.\s*", "", match.group(2), flags=re.IGNORECASE)
+            cleaned.append(f"{label}: {detail}")
+            continue
+        cleaned.append(re.sub(r"^(Correct answer:\s*[A-D]\.\s*)Correct\.\s*", r"\1", line, flags=re.IGNORECASE))
+
+    return "\n".join(cleaned)
 
 
-def normalize_media_type(value: str) -> str:
-    media_type = str(value or "").strip().lower()
-    return media_type if media_type in {"image", "gif", "video", "link"} else "image"
+def rationale_choice_line(value: str) -> re.Match[str] | None:
+    return re.match(r"^([A-D])[:.)]?\s+(.+)$", value, flags=re.IGNORECASE)
 
 
 def infer_media_type(path: str) -> str:
@@ -200,14 +248,9 @@ def infer_media_type(path: str) -> str:
     return "image"
 
 
-def content_sort_key(content_id: str) -> tuple[int, str]:
-    match = re.search(r"(\d+)$", content_id)
-    return (int(match.group(1)) if match else 10_000, content_id)
-
-
-def content_version(intervention: list[dict[str, Any]], control: list[dict[str, Any]]) -> str:
+def content_version(rows: list[dict[str, Any]], target: str) -> str:
     payload = json.dumps(
-        {"intervention": intervention, "control": control},
+        {target: rows},
         ensure_ascii=True,
         sort_keys=True,
         separators=(",", ":"),
@@ -217,26 +260,29 @@ def content_version(intervention: list[dict[str, Any]], control: list[dict[str, 
 
 def replace_app_content(source: str, rows: list[dict[str, Any]], version: str) -> str:
     content_bank = format_content_bank(rows)
-    next_source = re.sub(
-        r"(?:const|window\.HCTK_CONTENT_BANK_VERSION =) [^;]*;",
+    next_source, version_count = re.subn(
+        r"window\.HCTK_CONTENT_BANK_VERSION\s*=\s*[^;]*;",
         f"window.HCTK_CONTENT_BANK_VERSION = '{version}';",
         source,
         count=1,
     )
+    if version_count != 1:
+        raise SystemExit("Could not find HCTK_CONTENT_BANK_VERSION assignment to replace")
     pattern = re.compile(r"window\.HCTK_CONTENT_BANK = \[[\s\S]*?\n\];")
-    replacement = content_bank.replace("const CONTENT_BANK =", "window.HCTK_CONTENT_BANK =")
-    next_source, count = pattern.subn(replacement, next_source, count=1)
+    next_source, count = pattern.subn(lambda _match: content_bank, next_source, count=1)
     if count != 1:
         raise SystemExit("Could not find HCTK_CONTENT_BANK block to replace")
     return next_source
 
 
 def format_content_bank(rows: list[dict[str, Any]]) -> str:
-    parts = ["const CONTENT_BANK = ["]
+    parts = ["window.HCTK_CONTENT_BANK = ["]
     for index, item in enumerate(rows):
         parts.extend([
             "  {",
             f"    id: {js_string(item['id'])},",
+            f"    activityId: {js_string(item['activityId'])},",
+            f"    sequence: {int(item['sequence'])},",
             f"    format: {js_string(item['format'])},",
             f"    focus: {js_string(item['focus'])},",
             f"    title: {js_string(item['title'])},",
@@ -254,7 +300,8 @@ def format_content_bank(rows: list[dict[str, Any]]) -> str:
             "    ],",
             f"    correctIndex: {int(item['correctIndex'])},",
             f"    rationale: {js_string(item['rationale'])},",
-            f"    calendarFact: {js_string(item['calendarFact'])}",
+            f"    citationNumbers: {js_string(item['citationNumbers'])},",
+            f"    citationReferences: {js_string(item['citationReferences'])}",
             "  }" + ("," if index < len(rows) - 1 else ""),
         ])
     parts.append("];")

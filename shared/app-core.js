@@ -17,9 +17,10 @@ const HCTK_LABELS = {
   contentViewedDetail: 'Participant viewed the current learning card.',
   contentCompletedDetail: 'Participant marked the scheduled refresher complete.',
   adminPreviewDetail: 'Admin opened a scheduled learning card preview.',
-  calendarSummaryPrefix: 'HCTK Refresher',
   calendarDescriptionFocusFallback: 'Learning card',
   calendarName: 'HCTK Refresher Reminders',
+  followUpConfirmationSummary: '6-Month Follow-Up Date Confirmation',
+  followUpVisitSummary: '6-Month Follow-Up Visit',
   icsFilename: 'hctk-six-month-reminders.ics',
   testIcsFilename: 'hctk-test-reminders.ics',
   ...(HCTK_CONFIG.labels || {})
@@ -33,6 +34,7 @@ const STUDY_DURATION_DAYS = 183;
 const REMINDER_HOUR = 8;
 const REMINDER_MINUTE = 0;
 const REMINDER_DURATION_MINUTES = 15;
+const FOLLOW_UP_VISIT_DURATION_MINUTES = 60;
 const CENTRAL_TIME_ZONE = 'America/Chicago';
 const SCHEDULE_POLICY_VERSION = 'weekly-saturday-v1';
 const TEST_SCHEDULE_POLICY_VERSION = 'admin-minute-test-v1';
@@ -49,10 +51,15 @@ const COMPLETION_FORM_FIELDS = {
   activityNumber: 'r3c5305e447944b5f84b8689a2f46204d',
   openedFromCalendarNotification: 'r7946ff1c242b43bc84df050bbb336bb4'
 };
+const FOLLOW_UP_FORM_URL = 'https://forms.office.com/Pages/ResponsePage.aspx?id=ex-PmxOwcUSoxJmhXsyLHASfr2nPNIdAniE9JM-Weq5UNkJCWUREVVRGU0pVUFFHS1VOVUY5NjU5UC4u';
+const FOLLOW_UP_FORM_FIELDS = {
+  studyId: 'rf07a9d85d6944c6e966b381943f61c7c',
+  followUpDate: 'r1d8f23f5f29a4c549fced07da03b099b'
+};
 const PARTICIPANT_PASSWORD = 'tkhcpass';
 const ADMIN_PASSWORD = 'tkhcadmin';
 const DEFAULT_MEDIA_PATH = 'assets/blank-card.svg';
-const CONTENT_BANK = (window.HCTK_CONTENT_BANK || []).map(normalizeContentItem);
+const CONTENT_BANK = Array.isArray(window.HCTK_CONTENT_BANK) ? window.HCTK_CONTENT_BANK : [];
 
 const elements = {
   appShell: document.querySelector('#appShell'),
@@ -62,11 +69,14 @@ const elements = {
   saveState: document.querySelector('#saveState'),
   studyIdInput: document.querySelector('#studyIdInput'),
   enrollmentDateInput: document.querySelector('#enrollmentDateInput'),
+  followUpDateInput: document.querySelector('#followUpDateInput'),
+  followUpTimeInput: document.querySelector('#followUpTimeInput'),
   participantGate: document.querySelector('#participantGate'),
   participantPasswordInput: document.querySelector('#participantPasswordInput'),
   participantUnlockButton: document.querySelector('#participantUnlockButton'),
   participantUnlockStatus: document.querySelector('#participantUnlockStatus'),
   adminOpenButton: document.querySelector('#adminOpenButton'),
+  adminExitButton: document.querySelector('#adminExitButton'),
   adminGate: document.querySelector('#adminGate'),
   adminPasswordInput: document.querySelector('#adminPasswordInput'),
   adminUnlockButton: document.querySelector('#adminUnlockButton'),
@@ -76,6 +86,7 @@ const elements = {
   adminOnlyElements: [...document.querySelectorAll('.admin-only')],
   noDueBox: document.querySelector('#noDueBox'),
   learningCard: document.querySelector('#learningCard'),
+  todayTitle: document.querySelector('#todayTitle'),
   cardMeta: document.querySelector('#cardMeta'),
   nextDueMeta: document.querySelector('#nextDueMeta'),
   contentMedia: document.querySelector('#contentMedia'),
@@ -89,6 +100,7 @@ const elements = {
   participantCompletionFormLink: document.querySelector('#participantCompletionFormLink'),
   regeneratePlanButton: document.querySelector('#regeneratePlanButton'),
   scheduleModeStatus: document.querySelector('#scheduleModeStatus'),
+  scheduleActionStatus: document.querySelector('#scheduleActionStatus'),
   schedulePresetButtons: [...document.querySelectorAll('.schedule-preset-button')],
   plannedCount: document.querySelector('#plannedCount'),
   completedCount: document.querySelector('#completedCount'),
@@ -97,6 +109,7 @@ const elements = {
   activityList: document.querySelector('#activityList'),
   adminProfileSummary: document.querySelector('#adminProfileSummary'),
   refreshActivityButton: document.querySelector('#refreshActivityButton'),
+  activityRefreshStatus: document.querySelector('#activityRefreshStatus'),
   adminReviewSelect: document.querySelector('#adminReviewSelect'),
   adminReviewButton: document.querySelector('#adminReviewButton'),
   adminGenerateFormLinkButton: document.querySelector('#adminGenerateFormLinkButton'),
@@ -116,6 +129,7 @@ const state = {
   plan: [],
   events: [],
   scheduleSettings: defaultScheduleSettings(),
+  pendingScheduleSettings: defaultScheduleSettings(),
   adminCompletionLink: null,
   calendarOpenScheduleIds: new Set(),
   calendarLinkStatus: null,
@@ -131,8 +145,13 @@ async function init() {
   await deleteLegacyPersistence();
   state.profile = sanitizeProfile(await getMeta('profile'));
   state.scheduleSettings = sanitizeScheduleSettings(await getMeta('scheduleSettings'));
+  state.pendingScheduleSettings = { ...state.scheduleSettings };
   state.calendarOpenScheduleIds = new Set(await getMeta('calendarOpenScheduleIds') || []);
   state.participantUnlocked = (await getMeta('unlocked')) === true;
+  if (state.participantUnlocked && !profileReadyForParticipantUnlock(state.profile)) {
+    state.participantUnlocked = false;
+    await setMeta('unlocked', false);
+  }
 
   const savedPolicyVersion = await getMeta('schedulePolicyVersion');
   const savedContentBankVersion = await getMeta('contentBankVersion');
@@ -174,7 +193,7 @@ function bindEvents() {
     button.addEventListener('click', () => activateTab(button.dataset.tab));
   });
 
-  [elements.studyIdInput, elements.enrollmentDateInput].forEach((input) => {
+  [elements.studyIdInput, elements.enrollmentDateInput, elements.followUpDateInput, elements.followUpTimeInput].forEach((input) => {
     input.addEventListener('change', saveProfileFromForm);
     input.addEventListener('blur', saveProfileFromForm);
   });
@@ -188,20 +207,20 @@ function bindEvents() {
     elements.adminGate.classList.toggle('hidden');
     elements.adminUnlockStatus.textContent = '';
   });
+  elements.adminExitButton.addEventListener('click', exitAdminMode);
   elements.adminPasswordInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') unlockAdmin();
   });
   elements.adminUnlockButton.addEventListener('click', unlockAdmin);
 
   elements.regeneratePlanButton.addEventListener('click', async () => {
-    await applySchedulePreset(state.scheduleSettings.mode, state.scheduleSettings.testIntervalMinutes);
+    await applySchedulePreset(state.pendingScheduleSettings.mode, state.pendingScheduleSettings.testIntervalMinutes);
   });
 
   elements.schedulePresetButtons.forEach((button) => {
-    button.addEventListener('click', async () => {
-      const mode = button.dataset.scheduleMode === SCHEDULE_MODE_PRODUCTION ? SCHEDULE_MODE_PRODUCTION : SCHEDULE_MODE_TEST;
-      const interval = Number(button.dataset.testInterval || 0);
-      await applySchedulePreset(mode, interval);
+    button.addEventListener('click', () => {
+      state.pendingScheduleSettings = scheduleSettingsFromPresetButton(button);
+      renderSchedulePresetButtons();
     });
   });
 
@@ -211,7 +230,7 @@ function bindEvents() {
     await recordParticipantCompletionAndLaunchForm(item);
   });
 
-  elements.refreshActivityButton.addEventListener('click', refreshAll);
+  elements.refreshActivityButton.addEventListener('click', refreshActivityView);
   elements.adminReviewButton.addEventListener('click', reviewSelectedAdminCard);
   elements.adminGenerateFormLinkButton.addEventListener('click', generateAdminCompletionLink);
   elements.downloadCalendarButton.addEventListener('click', downloadCalendar);
@@ -231,6 +250,10 @@ async function unlockParticipant() {
   await saveProfileFromForm();
   if (elements.participantPasswordInput.value !== PARTICIPANT_PASSWORD) {
     elements.participantUnlockStatus.textContent = 'Incorrect study password.';
+    return;
+  }
+  if (!profileReadyForParticipantUnlock(state.profile)) {
+    elements.participantUnlockStatus.textContent = 'Enter Study ID, Follow-up Date, and Follow-up Time before unlocking.';
     return;
   }
 
@@ -273,6 +296,22 @@ async function unlockAdmin() {
   await refreshAll();
 }
 
+async function exitAdminMode() {
+  state.adminUnlocked = false;
+  state.adminCompletionLink = null;
+  state.calendarLinkStatus = null;
+  elements.adminGate.classList.add('hidden');
+  elements.adminUnlockStatus.textContent = '';
+  elements.adminReviewStatus.textContent = '';
+  if (elements.scheduleActionStatus) elements.scheduleActionStatus.textContent = '';
+  if (elements.activityRefreshStatus) elements.activityRefreshStatus.textContent = '';
+  state.selectedScheduleId = currentParticipantScheduleItem()?.id || null;
+  clearScheduleParam();
+  renderAccessState();
+  activateTab('today');
+  await refreshAll();
+}
+
 function renderAccessState() {
   const canUseApp = state.participantUnlocked || state.adminUnlocked;
   elements.appShell.classList.toggle('locked', !canUseApp);
@@ -282,6 +321,7 @@ function renderAccessState() {
   elements.participantSetupContent.classList.toggle('hidden', state.participantUnlocked);
   elements.adminAccessPanel.classList.toggle('admin-standalone', state.participantUnlocked);
   elements.participantGate.classList.toggle('hidden', state.participantUnlocked);
+  elements.adminOpenButton.classList.toggle('hidden', state.adminUnlocked);
   elements.adminOnlyElements.forEach((element) => {
     element.classList.toggle('hidden', !state.adminUnlocked);
   });
@@ -312,13 +352,17 @@ function activeTabName() {
 function hydrateProfileForm() {
   elements.studyIdInput.value = state.profile.studyId || '';
   elements.enrollmentDateInput.value = state.profile.enrollmentDate || todayChicagoISODate();
+  elements.followUpDateInput.value = state.profile.followUpDate || '';
+  elements.followUpTimeInput.value = state.profile.followUpTime || '';
 }
 
 async function saveProfileFromForm() {
   const previousEnrollmentDate = state.profile.enrollmentDate;
   state.profile = sanitizeProfile({
     studyId: elements.studyIdInput.value.trim().toUpperCase(),
-    enrollmentDate: elements.enrollmentDateInput.value || todayChicagoISODate()
+    enrollmentDate: elements.enrollmentDateInput.value || todayChicagoISODate(),
+    followUpDate: elements.followUpDateInput.value || '',
+    followUpTime: elements.followUpTimeInput.value || ''
   });
   await setMeta('profile', state.profile);
 
@@ -413,6 +457,7 @@ async function applySchedulePreset(mode, intervalMinutes) {
       testStartedAt: new Date().toISOString()
     }
     : defaultScheduleSettings();
+  state.pendingScheduleSettings = { ...state.scheduleSettings };
   state.plan = generatePlan(state.profile, state.scheduleSettings);
   state.selectedScheduleId = currentParticipantScheduleItem()?.id || state.plan[0]?.id || null;
   state.adminCompletionLink = null;
@@ -426,6 +471,7 @@ async function applySchedulePreset(mode, intervalMinutes) {
     testStartedAt: state.scheduleSettings.testStartedAt || ''
   });
   await refreshAll();
+  showActionStatus(elements.scheduleActionStatus, `Schedule regenerated: ${scheduleModeLabel()}.`);
 }
 
 async function selectAdminSchedule(scheduleId) {
@@ -457,8 +503,7 @@ async function reviewSelectedAdminCard() {
 async function generateAdminCompletionLink() {
   if (!state.adminUnlocked) return;
   await saveProfileFromForm();
-  const scheduleId = elements.adminReviewSelect.value;
-  const item = state.plan.find((planItem) => planItem.id === scheduleId);
+  const item = selectedAdminReviewItem();
   if (!item) return;
 
   if (!state.profile.studyId) {
@@ -474,6 +519,7 @@ async function generateAdminCompletionLink() {
     url: completionFormUrl
   };
   state.selectedScheduleId = item.id;
+  elements.adminReviewSelect.value = item.id;
   renderAdminReviewPicker();
   renderCards();
 
@@ -488,6 +534,11 @@ async function generateAdminCompletionLink() {
   state.events = await getAllEvents();
   renderActivity();
   elements.adminReviewStatus.textContent = `Form link ready for Activity ${formatActivityNumber(item)}.`;
+}
+
+async function refreshActivityView() {
+  await refreshAll();
+  showActionStatus(elements.activityRefreshStatus, `Activity log refreshed at ${formatDateTime(new Date().toISOString())}.`);
 }
 
 async function recordParticipantCompletionAndLaunchForm(item) {
@@ -528,20 +579,20 @@ function renderLearningCard() {
   }
 
   const adminPreview = state.adminUnlocked && state.selectedScheduleId === item.id;
-  const adminCalendarOverride = adminPreview &&
-    state.calendarLinkStatus?.kind === 'adminOverride' &&
-    state.calendarLinkStatus.scheduleId === item.id;
   const participantInteract = !adminPreview && state.participantUnlocked && isScheduleItemAccessible(item);
   const canAnswer = participantInteract || adminPreview;
   elements.learningCard.classList.remove('hidden');
   elements.noDueBox.classList.add('hidden');
-  elements.cardMeta.textContent = adminPreview
-    ? `${adminCalendarOverride ? 'Admin calendar-link test' : 'Admin test preview'} · Activity ${formatActivityNumber(item)} · ${formatScheduleWindow(item)} · ${content.focus}`
-    : `Activity ${formatActivityNumber(item)} · ${formatScheduleWindow(item)} · ${content.focus}`;
+  elements.todayTitle.textContent = `Activity ${formatActivityNumber(item)}`;
+  elements.cardMeta.textContent = nextActivityDueText(item);
+  elements.cardMeta.classList.remove('hidden');
+  elements.nextDueMeta.classList.add('hidden');
   renderContentMedia(content);
   elements.contentType.textContent = content.format;
+  elements.contentType.classList.add('hidden');
   elements.contentTitle.textContent = content.title;
   elements.contentPrompt.textContent = content.prompt;
+  elements.contentPrompt.classList.toggle('hidden', !content.prompt);
   elements.feedbackBox.classList.add('hidden');
   elements.feedbackBox.textContent = '';
   elements.answerChoices.innerHTML = '';
@@ -550,8 +601,9 @@ function renderLearningCard() {
   elements.completeButton.classList.toggle('hidden', !participantInteract || participantCompleted);
   renderParticipantCompletionLink(item, participantCompleted ? completionEvent : null);
 
-  if (content.choices.length) {
-    content.choices.forEach((choice, index) => {
+  const choices = Array.isArray(content.choices) ? content.choices : [];
+  if (choices.length) {
+    choices.forEach((choice, index) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'choice-button';
@@ -562,11 +614,11 @@ function renderLearningCard() {
         const isCorrect = index === content.correctIndex;
         [...elements.answerChoices.children].forEach((child) => child.classList.remove('selected'));
         button.classList.add('selected');
-        elements.feedbackBox.textContent = adminPreview
-          ? `${isCorrect ? 'Correct' : 'Incorrect'} test selection. ${content.rationale}`
-          : isCorrect
-            ? `Recorded. ${content.rationale}`
-            : `Recorded for review. ${content.rationale}`;
+        renderQuestionFeedback({
+          adminPreview,
+          isCorrect,
+          rationale: content.rationale
+        });
         elements.feedbackBox.classList.remove('hidden');
 
         await recordEvent(adminPreview ? 'admin_test_question_answered' : 'question_answered', `${adminPreview ? 'Admin test selected' : 'Selected'} choice ${index + 1}.`, {
@@ -587,9 +639,76 @@ function renderLearningCard() {
   }
 }
 
+function renderQuestionFeedback({ isCorrect, rationale }) {
+  elements.feedbackBox.innerHTML = '';
+
+  const status = document.createElement('p');
+  status.className = 'feedback-status';
+  status.textContent = isCorrect ? 'Correct.' : 'Incorrect.';
+  elements.feedbackBox.appendChild(status);
+
+  const explanation = buildFeedbackExplanation(rationale);
+  if (explanation) {
+    elements.feedbackBox.appendChild(explanation);
+  }
+}
+
+function buildFeedbackExplanation(rationale) {
+  const lines = String(rationale || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (!lines.length) return null;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'feedback-explanation';
+  let list = null;
+
+  const hasChoiceList = lines.filter((line) => feedbackChoiceLine(line)).length >= 2;
+
+  lines.forEach((line) => {
+    if (hasChoiceList && /^Correct answer:\s*[A-D]\b/i.test(line)) return;
+
+    const match = feedbackChoiceLine(line);
+    if (match) {
+      if (!list) {
+        list = document.createElement('ul');
+        wrapper.appendChild(list);
+      }
+      const item = document.createElement('li');
+      item.textContent = formatFeedbackChoiceLine(match);
+      list.appendChild(item);
+      return;
+    }
+
+    list = null;
+    const paragraph = document.createElement('p');
+    paragraph.textContent = line.replace(/^(Correct answer:\s*[A-D]\.\s*)Correct\.\s*/i, '$1');
+    wrapper.appendChild(paragraph);
+  });
+
+  return wrapper;
+}
+
+function feedbackChoiceLine(line) {
+  return String(line || '').match(/^([A-D]|[-*•])[:.)]?\s+(.+)$/i);
+}
+
+function formatFeedbackChoiceLine(match) {
+  if (!/^[A-D]$/i.test(match[1])) return match[2];
+  const label = match[1].toUpperCase();
+  const text = match[2].replace(/^Correct\.\s*/i, '');
+  return `${label}: ${text}`;
+}
+
 function renderContentMedia(content) {
   if (!elements.contentMedia) return;
   elements.contentMedia.innerHTML = '';
+  elements.learningCard.classList.toggle('no-media', !contentHasMedia(content));
+  elements.contentMedia.classList.toggle('hidden', !contentHasMedia(content));
+
+  if (!contentHasMedia(content)) return;
 
   if (content.mediaType === 'video') {
     const video = document.createElement('video');
@@ -637,10 +756,17 @@ function renderFallbackMedia(altText) {
   elements.contentMedia.appendChild(image);
 }
 
+function contentHasMedia(content) {
+  return Boolean(content?.mediaPath);
+}
+
 function renderNoDueState() {
   const heading = elements.noDueBox.querySelector('h3');
   const body = elements.noDueBox.querySelector('p');
   const status = state.calendarLinkStatus;
+  elements.todayTitle.textContent = HCTK_LABELS.todayTitle;
+  elements.cardMeta.classList.remove('hidden');
+  elements.nextDueMeta.classList.remove('hidden');
   elements.cardMeta.textContent = `Today in Central Time: ${formatDisplayDate(todayChicagoISODate())}`;
 
   if (!heading || !body) return;
@@ -718,6 +844,13 @@ function renderNextDueMeta() {
     : `No remaining ${HCTK_LABELS.itemPlural} are scheduled.`;
 }
 
+function nextActivityDueText(item) {
+  const next = state.plan.find((planItem) => planItem.sequenceNumber > item.sequenceNumber);
+  return next
+    ? `Next activity due: ${formatScheduleDateTime(next)}`
+    : 'Next activity due: none scheduled';
+}
+
 function renderMetrics() {
   const completed = eventSet('content_completed', 'scheduleId');
   const viewed = eventSet('content_viewed', 'scheduleId');
@@ -758,11 +891,17 @@ function renderScheduleModeStatus() {
   elements.scheduleModeStatus.textContent = testMode
     ? `Testing: every ${state.scheduleSettings.testIntervalMinutes} minutes, started ${formatDateTime(state.scheduleSettings.testStartedAt)}.`
     : 'Production weekly Saturdays at 8:00 AM Central.';
+  renderSchedulePresetButtons();
+}
+
+function renderSchedulePresetButtons() {
+  const pending = state.pendingScheduleSettings || state.scheduleSettings;
+  const pendingTestMode = isTestScheduleSettings(pending);
   elements.schedulePresetButtons.forEach((button) => {
     const buttonMode = button.dataset.scheduleMode === SCHEDULE_MODE_PRODUCTION ? SCHEDULE_MODE_PRODUCTION : SCHEDULE_MODE_TEST;
     const interval = Number(button.dataset.testInterval || 0);
-    const active = testMode
-      ? buttonMode === SCHEDULE_MODE_TEST && interval === state.scheduleSettings.testIntervalMinutes
+    const active = pendingTestMode
+      ? buttonMode === SCHEDULE_MODE_TEST && interval === pending.testIntervalMinutes
       : buttonMode === SCHEDULE_MODE_PRODUCTION;
     button.classList.toggle('active', active);
   });
@@ -798,9 +937,11 @@ function renderCards() {
   state.plan.forEach((item) => {
     const content = contentById(item.contentId);
     const card = document.createElement('article');
-    card.className = item.id === state.selectedScheduleId
-      ? 'content-bank-card scheduled-activity-card selected'
-      : 'content-bank-card scheduled-activity-card';
+    const classes = ['content-bank-card', 'scheduled-activity-card'];
+    if (item.id === state.selectedScheduleId) classes.push('selected');
+    if (!contentHasMedia(content)) classes.push('no-media');
+    card.className = classes.join(' ');
+    const promptHTML = content?.prompt ? `<p>${escapeHTML(content.prompt)}</p>` : '';
     card.innerHTML = `
       ${adminCardMediaHTML(content)}
       <div>
@@ -808,7 +949,7 @@ function renderCards() {
         <h3>Activity ${escapeHTML(formatActivityNumber(item))}: ${escapeHTML(content?.title || HCTK_LABELS.contentFallback)}</h3>
         <p><strong>Due:</strong> ${escapeHTML(formatScheduleDateTime(item))}</p>
         <p><strong>Focus:</strong> ${escapeHTML(content?.focus || HCTK_LABELS.focusFallback)}</p>
-        <p>${escapeHTML(content?.prompt || '')}</p>
+        ${promptHTML}
         <div class="scheduled-card-actions"></div>
       </div>
     `;
@@ -834,9 +975,7 @@ function renderCards() {
 }
 
 function adminCardMediaHTML(content) {
-  if (!content) {
-    return '<div class="content-bank-media-placeholder"><p>Placeholder media</p></div>';
-  }
+  if (!contentHasMedia(content)) return '';
   if (content.mediaType === 'video') {
     return `<video src="${escapeHTML(content.mediaPath)}" aria-label="${escapeHTML(content.mediaAlt)}" muted preload="metadata"></video>`;
   }
@@ -878,10 +1017,19 @@ function renderAdminCompletionLink() {
   elements.adminCompletionFormUrl.textContent = link.url;
 }
 
+function selectedAdminReviewItem() {
+  return state.plan.find((item) => item.id === elements.adminReviewSelect.value) ||
+    state.plan.find((item) => item.id === state.selectedScheduleId) ||
+    state.plan[0] ||
+    null;
+}
+
 function renderAdminProfileSummary() {
   elements.adminProfileSummary.innerHTML = `
     <div><strong>Study ID</strong><span>${escapeHTML(state.profile.studyId || 'Not set')}</span></div>
     <div><strong>Enrollment Date</strong><span>${escapeHTML(state.profile.enrollmentDate)}</span></div>
+    <div><strong>Follow-up Date</strong><span>${escapeHTML(state.profile.followUpDate || 'Not set')}</span></div>
+    <div><strong>Follow-up Time</strong><span>${escapeHTML(formatFollowUpTime())}</span></div>
     <div><strong>Schedule Mode</strong><span>${escapeHTML(scheduleModeLabel())}</span></div>
     <div><strong>Schedule Policy</strong><span>${escapeHTML(activeSchedulePolicyVersion())}</span></div>
     <div><strong>Central Date Today</strong><span>${escapeHTML(todayChicagoISODate())}</span></div>
@@ -890,6 +1038,10 @@ function renderAdminProfileSummary() {
 
 async function downloadCalendar() {
   await saveProfileFromForm();
+  if (!profileReadyForParticipantUnlock(state.profile)) {
+    elements.exportStatus.textContent = 'Set Study ID, Follow-up Date, and Follow-up Time before downloading the calendar.';
+    return;
+  }
   const ics = makeCalendarICS();
   const filename = isTestScheduleMode() ? HCTK_LABELS.testIcsFilename : HCTK_LABELS.icsFilename;
   downloadTextFile(ics, filename, 'text/calendar;charset=utf-8');
@@ -942,17 +1094,25 @@ function makeCalendarICS() {
     const content = contentById(item.contentId);
     const link = reminderLink(item);
     const calendarContent = calendarContentForEvent(content);
+    const descriptionLines = [`Title: ${calendarContent.title}`];
+    if (calendarContent.detailText) {
+      descriptionLines.push(`${calendarContent.detailLabel}: ${calendarContent.detailText}`);
+    }
+    descriptionLines.push(
+      `Focus: ${content?.focus || HCTK_LABELS.calendarDescriptionFocusFallback}`,
+      `Open: ${link}`
+    );
     const start = calendarEventStart(item);
     const endDate = calendarEventEnd(item);
 
     lines.push(
       'BEGIN:VEVENT',
-      `UID:${item.id}@${HCTK_CONFIG.uidDomain || 'hctk-serverless-pwa'}`,
+      `UID:${item.id}@${HCTK_CONFIG.uidDomain || 'hctk-pwa'}`,
       `DTSTAMP:${compactUTCDateTime(new Date())}`,
       `DTSTART;TZID=${CENTRAL_TIME_ZONE}:${start}`,
       `DTEND;TZID=${CENTRAL_TIME_ZONE}:${endDate}`,
-      `SUMMARY:${escapeICS(`${HCTK_LABELS.calendarSummaryPrefix} ${item.sequenceNumber}: ${calendarContent.summary}`)}`,
-      `DESCRIPTION:${escapeICS(`Title: ${calendarContent.title}\n${calendarContent.detailLabel}: ${calendarContent.detailText}\nFocus: ${content?.focus || HCTK_LABELS.calendarDescriptionFocusFallback}\nFact: ${calendarContent.fact}\nOpen: ${link}`)}`,
+      `SUMMARY:${escapeICS(calendarContent.summary)}`,
+      `DESCRIPTION:${escapeICS(descriptionLines.join('\n'))}`,
       `URL;VALUE=URI:${link}`,
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
@@ -963,43 +1123,85 @@ function makeCalendarICS() {
     );
   });
 
+  addFollowUpCalendarEvents(lines);
   lines.push('END:VCALENDAR');
   return lines.map(foldICSLine).join('\r\n') + '\r\n';
 }
 
+function addFollowUpCalendarEvents(lines) {
+  if (!isISODate(state.profile.followUpDate) || !isLocalTime(state.profile.followUpTime)) return;
+
+  const link = buildFollowUpFormUrl();
+  const uidStudyId = String(state.profile.studyId || 'participant').replace(/[^a-z0-9-]/gi, '') || 'participant';
+  const confirmationDate = addDaysToISODate(state.profile.followUpDate, -7);
+  const confirmationStart = compactLocalDateTime(confirmationDate, REMINDER_HOUR, REMINDER_MINUTE);
+  const confirmationEnd = addMinutesToLocalDate(confirmationDate, REMINDER_HOUR, REMINDER_MINUTE, REMINDER_DURATION_MINUTES);
+  const confirmationDescription = [
+    `Study ID: ${state.profile.studyId || ''}`,
+    `Follow-up Visit: ${formatFollowUpDateTime()}`,
+    `Open: ${link}`
+  ];
+
+  lines.push(
+    'BEGIN:VEVENT',
+    `UID:${SCHEDULE_ID_PREFIX}-follow-up-confirmation-${state.profile.followUpDate}-${uidStudyId}@${HCTK_CONFIG.uidDomain || 'hctk-pwa'}`,
+    `DTSTAMP:${compactUTCDateTime(new Date())}`,
+    `DTSTART;TZID=${CENTRAL_TIME_ZONE}:${confirmationStart}`,
+    `DTEND;TZID=${CENTRAL_TIME_ZONE}:${confirmationEnd}`,
+    `SUMMARY:${escapeICS(HCTK_LABELS.followUpConfirmationSummary)}`,
+    `DESCRIPTION:${escapeICS(confirmationDescription.join('\n'))}`,
+    `URL;VALUE=URI:${link}`,
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'TRIGGER:-PT0M',
+    `DESCRIPTION:${escapeICS(HCTK_LABELS.followUpConfirmationSummary)}`,
+    'END:VALARM',
+    'END:VEVENT'
+  );
+
+  const [visitHour, visitMinute] = parseLocalTime(state.profile.followUpTime);
+  const visitStart = compactLocalDateTime(state.profile.followUpDate, visitHour, visitMinute);
+  const visitEnd = addMinutesToLocalDate(state.profile.followUpDate, visitHour, visitMinute, FOLLOW_UP_VISIT_DURATION_MINUTES);
+  const visitDescription = [
+    `Study ID: ${state.profile.studyId || ''}`,
+    `Follow-up Visit: ${formatFollowUpDateTime()}`
+  ];
+
+  lines.push(
+    'BEGIN:VEVENT',
+    `UID:${SCHEDULE_ID_PREFIX}-follow-up-visit-${state.profile.followUpDate}-${uidStudyId}@${HCTK_CONFIG.uidDomain || 'hctk-pwa'}`,
+    `DTSTAMP:${compactUTCDateTime(new Date())}`,
+    `DTSTART;TZID=${CENTRAL_TIME_ZONE}:${visitStart}`,
+    `DTEND;TZID=${CENTRAL_TIME_ZONE}:${visitEnd}`,
+    `SUMMARY:${escapeICS(HCTK_LABELS.followUpVisitSummary)}`,
+    `DESCRIPTION:${escapeICS(visitDescription.join('\n'))}`,
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'TRIGGER:-PT0M',
+    `DESCRIPTION:${escapeICS(HCTK_LABELS.followUpVisitSummary)}`,
+    'END:VALARM',
+    'END:VEVENT'
+  );
+}
+
 function calendarContentForEvent(content) {
   const format = cleanCalendarText(content?.format, HCTK_LABELS.contentTypeFallback);
-  const title = cleanCalendarText(content?.title, 'Learning activity');
-  const prompt = cleanCalendarText(content?.prompt, '');
-  const fact = cleanCalendarText(content?.calendarFact, prompt || title);
-  const hasChoices = Array.isArray(content?.choices) && content.choices.length > 0;
-  const isQuestion = /question|quiz|check/i.test(format) || (hasChoices && Boolean(prompt));
-  const detailLabel = isQuestion
-    ? 'Question'
-    : format;
-  const detailText = isQuestion
-    ? cleanCalendarText(prompt, fact || title)
-    : cleanCalendarText(fact || prompt, title);
-  const summary = isQuestion || detailText === title
-    ? title
-    : `${title}: ${detailText}`;
-  const alert = detailText === title
-    ? title
-    : `${title}: ${detailText}`;
+  const title = cleanCalendarText(content?.title, HCTK_LABELS.contentFallback);
+  const detailText = cleanCalendarText(content?.prompt, '');
+  const detailLabel = /question/i.test(format) ? 'Question' : 'Detail';
 
   return {
     title,
     detailLabel,
     detailText,
-    fact: cleanCalendarText(fact, detailText),
-    summary,
-    alert
+    summary: title,
+    alert: title
   };
 }
 
 function cleanCalendarText(value, fallback) {
   const text = String(value || '').replace(/\s+/g, ' ').trim();
-  return text || fallback;
+  return text || fallback || '';
 }
 
 function makeCSV() {
@@ -1172,41 +1374,6 @@ function planUsesCurrentContentBank(plan) {
     plan.every((item) => contentById(item.contentId));
 }
 
-function normalizeContentItem(item) {
-  const legacyImage = item.image || item.imagePath || '';
-  const mediaPath = item.mediaPath || item.media_path || item.media || legacyImage || DEFAULT_MEDIA_PATH;
-  const mediaType = normalizeMediaType(item.mediaType || item.media_type || inferMediaType(mediaPath));
-  const focus = item.focus || 'Placeholder focus';
-  return {
-    ...item,
-    focus,
-    format: item.format || HCTK_LABELS.contentTypeFallback,
-    title: item.title || 'Placeholder title',
-    prompt: item.prompt || 'Placeholder question',
-    choices: Array.isArray(item.choices) ? item.choices : [],
-    correctIndex: Number.isInteger(item.correctIndex) ? item.correctIndex : 0,
-    rationale: item.rationale || 'Placeholder rationale',
-    calendarFact: item.calendarFact || 'Placeholder calendar notification text',
-    mediaType,
-    mediaPath,
-    mediaAlt: item.mediaAlt || item.media_alt || 'Placeholder media',
-    image: mediaType === 'link' ? DEFAULT_MEDIA_PATH : mediaPath
-  };
-}
-
-function normalizeMediaType(value) {
-  const type = String(value || '').trim().toLowerCase();
-  return ['image', 'gif', 'video', 'link'].includes(type) ? type : 'image';
-}
-
-function inferMediaType(path) {
-  const text = String(path || '').trim().toLowerCase();
-  if (/^https?:\/\//.test(text)) return 'link';
-  if (/\.(mp4|webm|mov|m4v)(\?|#|$)/.test(text)) return 'video';
-  if (/\.gif(\?|#|$)/.test(text)) return 'gif';
-  return 'image';
-}
-
 function contentById(id) {
   return CONTENT_BANK.find((item) => item.id === id);
 }
@@ -1219,19 +1386,6 @@ function firstEventForSchedule(scheduleId, kinds) {
   return state.events
     .filter((event) => event.scheduleId === scheduleId && kinds.includes(event.kind))
     .sort((left, right) => left.timestamp.localeCompare(right.timestamp))[0] || null;
-}
-
-function latestEventOfKind(kind) {
-  return state.events
-    .filter((event) => event.kind === kind)
-    .sort((left, right) => right.timestamp.localeCompare(left.timestamp))[0] || null;
-}
-
-function choiceIndexForEvent(event, content) {
-  if (event.choiceIndex) return event.choiceIndex;
-  if (!event.choice || !content?.choices?.length) return '';
-  const index = content.choices.findIndex((choice) => choice === event.choice);
-  return index >= 0 ? index + 1 : '';
 }
 
 function labelForEvent(kind) {
@@ -1281,9 +1435,18 @@ function buildCompletionFormUrl(completedAt, item) {
   return url.toString();
 }
 
+function buildFollowUpFormUrl() {
+  const url = new URL(FOLLOW_UP_FORM_URL);
+  url.searchParams.set(FOLLOW_UP_FORM_FIELDS.studyId, state.profile.studyId || '');
+  if (state.profile.followUpDate) {
+    url.searchParams.set(FOLLOW_UP_FORM_FIELDS.followUpDate, `"${state.profile.followUpDate}"`);
+  }
+  return url.toString();
+}
+
 function formatActivityNumber(item) {
   if (!item?.sequenceNumber) return '';
-  return `${item.sequenceNumber}/26`;
+  return `${item.sequenceNumber}/${ACTIVITY_COUNT}`;
 }
 
 function openedFromCalendarNotificationValue(scheduleId) {
@@ -1310,6 +1473,19 @@ function sanitizeScheduleSettings(settings) {
     };
   }
   return defaultScheduleSettings();
+}
+
+function scheduleSettingsFromPresetButton(button) {
+  const mode = button.dataset.scheduleMode === SCHEDULE_MODE_PRODUCTION ? SCHEDULE_MODE_PRODUCTION : SCHEDULE_MODE_TEST;
+  if (mode === SCHEDULE_MODE_PRODUCTION) return defaultScheduleSettings();
+  const interval = TEST_INTERVAL_OPTIONS.includes(Number(button.dataset.testInterval))
+    ? Number(button.dataset.testInterval)
+    : TEST_INTERVAL_OPTIONS[0];
+  return {
+    mode: SCHEDULE_MODE_TEST,
+    testIntervalMinutes: interval,
+    testStartedAt: ''
+  };
 }
 
 function isTestScheduleMode() {
@@ -1363,6 +1539,19 @@ function formatScheduleShortLabel(item) {
   return formatDisplayDate(item.date);
 }
 
+function formatFollowUpTime() {
+  if (!isLocalTime(state.profile.followUpTime)) return 'Not set';
+  const [hour, minute] = parseLocalTime(state.profile.followUpTime);
+  const suffix = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${String(minute).padStart(2, '0')} ${suffix} Central`;
+}
+
+function formatFollowUpDateTime() {
+  if (!state.profile.followUpDate || !state.profile.followUpTime) return 'Not set';
+  return `${state.profile.followUpDate} at ${formatFollowUpTime()}`;
+}
+
 function microsoftPrefillDateFromTimestamp(value) {
   return `"${chicagoISODateFromTimestamp(value)}"`;
 }
@@ -1382,6 +1571,8 @@ function defaultProfile() {
   return {
     studyId: '',
     enrollmentDate: todayChicagoISODate(),
+    followUpDate: '',
+    followUpTime: '',
     durationDays: STUDY_DURATION_DAYS
   };
 }
@@ -1391,8 +1582,14 @@ function sanitizeProfile(profile) {
   return {
     studyId: String(profile?.studyId || '').trim().toUpperCase(),
     enrollmentDate: isISODate(profile?.enrollmentDate) ? profile.enrollmentDate : fallback.enrollmentDate,
+    followUpDate: isISODate(profile?.followUpDate) ? profile.followUpDate : fallback.followUpDate,
+    followUpTime: isLocalTime(profile?.followUpTime) ? profile.followUpTime : fallback.followUpTime,
     durationDays: STUDY_DURATION_DAYS
   };
+}
+
+function profileReadyForParticipantUnlock(profile) {
+  return Boolean(profile?.studyId && profile?.followUpDate && profile?.followUpTime);
 }
 
 function defaultAppUrl() {
@@ -1494,6 +1691,17 @@ function downloadTextFile(text, filename, type) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+function showActionStatus(element, message) {
+  if (!element) return;
+  element.textContent = message;
+}
+
+function clearScheduleParam() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('schedule');
+  window.history.replaceState({}, '', url);
+}
+
 function parseISODate(value) {
   const [year, month, day] = value.split('-').map(Number);
   return new Date(Date.UTC(year, month - 1, day));
@@ -1513,16 +1721,22 @@ function addDaysToISODate(value, days) {
   return toISODate(next);
 }
 
-function compareISODate(left, right) {
-  return left.localeCompare(right);
-}
-
 function dayOfWeek(value) {
   return parseISODate(value).getUTCDay();
 }
 
 function isISODate(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function isLocalTime(value) {
+  if (typeof value !== 'string' || !/^\d{2}:\d{2}$/.test(value)) return false;
+  const [hour, minute] = parseLocalTime(value);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+}
+
+function parseLocalTime(value) {
+  return String(value || '').split(':').map(Number);
 }
 
 function todayChicagoISODate(date = new Date()) {

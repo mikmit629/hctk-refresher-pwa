@@ -205,15 +205,9 @@ textarea:focus {
 .admin-entry {
   margin-top: 18px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: flex-end;
-}
-
-.admin-heading {
-  display: none;
-}
-
-.admin-access-panel.admin-standalone .admin-heading {
-  display: flex;
 }
 
 .admin-access-panel.admin-standalone .admin-entry {
@@ -265,7 +259,6 @@ textarea:focus {
 }
 
 .tab-button svg,
-.icon-button svg,
 .primary-button svg,
 .secondary-button svg {
   width: 18px;
@@ -296,6 +289,10 @@ textarea:focus {
   grid-template-columns: minmax(240px, 0.9fr) minmax(280px, 1fr);
   gap: 18px;
   align-items: stretch;
+}
+
+.learning-card.no-media {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .media-frame {
@@ -408,6 +405,32 @@ textarea:focus {
   line-height: 1.45;
 }
 
+.feedback p {
+  margin: 0;
+}
+
+.feedback-status {
+  font-weight: 800;
+}
+
+.feedback-explanation {
+  display: grid;
+  gap: 8px;
+}
+
+.feedback-status + .feedback-explanation {
+  margin-top: 8px;
+}
+
+.feedback-explanation ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.feedback-explanation li + li {
+  margin-top: 5px;
+}
+
 .empty-state {
   border-left-color: var(--accent);
   background: var(--accent-soft);
@@ -427,7 +450,6 @@ textarea:focus {
 
 .primary-button,
 .secondary-button,
-.icon-button,
 .link-button {
   border-radius: var(--radius-sm);
   min-height: 42px;
@@ -452,17 +474,6 @@ textarea:focus {
 }
 
 .secondary-button {
-  color: var(--ink);
-  background: #fff;
-  border-color: var(--line);
-}
-
-.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  padding: 0;
   color: var(--ink);
   background: #fff;
   border-color: var(--line);
@@ -684,6 +695,10 @@ textarea:focus {
   display: grid;
   grid-template-columns: 180px 1fr;
   gap: 14px;
+}
+
+.content-bank-card.no-media {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .scheduled-activity-card.selected {

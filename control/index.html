@@ -34,6 +34,14 @@
                 <span>Enrollment Date</span>
                 <input id="enrollmentDateInput" type="date">
               </label>
+              <label>
+                <span>Follow-up Date</span>
+                <input id="followUpDateInput" type="date">
+              </label>
+              <label>
+                <span>Follow-up Time</span>
+                <input id="followUpTimeInput" type="time">
+              </label>
             </form>
 
             <div id="participantGate" class="access-box">
@@ -49,6 +57,7 @@
           <div id="adminAccessPanel" class="admin-access-panel">
             <div class="admin-entry">
               <button id="adminOpenButton" class="link-button" type="button">Admin</button>
+              <button id="adminExitButton" class="secondary-button admin-only hidden" type="button">Exit Admin</button>
             </div>
           </div>
 
@@ -122,7 +131,6 @@
             <div class="section-heading compact">
               <div>
                 <h2 id="exportTitle">Exports</h2>
-                <p>Calendar reminders and admin recovery export.</p>
               </div>
             </div>
             <div class="export-grid">
@@ -142,9 +150,7 @@
             <div class="section-heading compact">
               <div>
                 <h2 id="scheduleTitle">Admin Schedule</h2>
-                <p>Production schedule and local testing presets.</p>
               </div>
-              <button id="regeneratePlanButton" class="secondary-button" type="button">Regenerate</button>
             </div>
             <div class="metrics-grid">
               <div><strong id="plannedCount">0</strong><span>planned</span></div>
@@ -163,27 +169,28 @@
                 <button class="secondary-button schedule-preset-button" type="button" data-schedule-mode="test" data-test-interval="10">Every 10 minutes</button>
                 <button class="secondary-button schedule-preset-button" type="button" data-schedule-mode="test" data-test-interval="15">Every 15 minutes</button>
               </div>
+              <button id="regeneratePlanButton" class="primary-button" type="button">Apply</button>
             </div>
             <div class="schedule-list" id="scheduleList"></div>
+            <p id="scheduleActionStatus" class="status-line"></p>
           </section>
 
           <section id="activityTab" class="tab-panel admin-only hidden" aria-labelledby="activityTitle">
             <div class="section-heading compact">
               <div>
                 <h2 id="activityTitle">Admin Activity Log</h2>
-                <p>Local browser records only.</p>
               </div>
               <button id="refreshActivityButton" class="secondary-button" type="button">Refresh</button>
             </div>
             <div class="admin-summary" id="adminProfileSummary"></div>
             <div id="activityList" class="activity-list"></div>
+            <p id="activityRefreshStatus" class="status-line"></p>
           </section>
 
           <section id="cardsTab" class="tab-panel admin-only hidden" aria-labelledby="cardsTitle">
             <div class="section-heading compact">
               <div>
-                <h2 id="cardsTitle">Admin Test Drive</h2>
-                <p>Review and test the 26 scheduled study activities.</p>
+                <h2 id="cardsTitle">Admin Test</h2>
               </div>
             </div>
             <div class="admin-review-box">

@@ -1,14 +1,7 @@
 @import url('../shared/styles.css');
 
 :root {
-  --bg: #f7f8f5;
-  --ink: #1f2a2e;
-  --muted: #627077;
-  --surface: #ffffff;
-  --surface-2: #eef2ee;
-  --line: #d9ded9;
   --accent: #2f7d73;
-  --accent-2: #a86922;
   --accent-soft: #e4f2ef;
   --bg-wash: rgba(47, 125, 115, 0.08);
 }
