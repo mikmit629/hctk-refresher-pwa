@@ -1,0 +1,14 @@
+@import url('shared/styles.css');
+
+:root {
+  --bg: #f7f8f5;
+  --ink: #1f2a2e;
+  --muted: #627077;
+  --surface: #ffffff;
+  --surface-2: #eef2ee;
+  --line: #d9ded9;
+  --accent: #b8282d;
+  --accent-2: #0f6f64;
+  --accent-soft: #fde8e8;
+  --bg-wash: rgba(184, 40, 45, 0.05);
+}

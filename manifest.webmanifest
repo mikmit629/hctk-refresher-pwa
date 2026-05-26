@@ -1,0 +1,20 @@
+{
+  "name": "HCTK Refresher",
+  "short_name": "HCTK Refresher",
+  "description": "HCTK",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#b8282d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

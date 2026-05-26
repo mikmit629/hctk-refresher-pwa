@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#2f7d73">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="HCTK Study">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>HCTK Study Activities</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/app-icon.svg">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell locked" id="appShell">
+      <main>
+        <section class="panel setup-panel" aria-labelledby="setupTitle">
+          <div id="participantSetupContent" class="participant-setup-content">
+            <div class="section-heading">
+              <div>
+                <h1 id="setupTitle">Participant Setup</h1>
+              </div>
+              <output id="saveState" class="status-pill">Idle</output>
+            </div>
+
+            <form id="profileForm" class="profile-grid">
+              <label>
+                <span>Study ID</span>
+                <input id="studyIdInput" autocomplete="off" inputmode="text" placeholder="HCTK-C001">
+              </label>
+              <label>
+                <span>Enrollment Date</span>
+                <input id="enrollmentDateInput" type="date">
+              </label>
+            </form>
+
+            <div id="participantGate" class="access-box">
+              <label>
+                <span>Study Password</span>
+                <input id="participantPasswordInput" type="password" autocomplete="off" placeholder="Enter study password">
+              </label>
+              <button id="participantUnlockButton" class="primary-button" type="button">Unlock</button>
+              <p id="participantUnlockStatus" class="status-line"></p>
+            </div>
+          </div>
+
+          <div id="adminAccessPanel" class="admin-access-panel">
+            <div class="admin-entry">
+              <button id="adminOpenButton" class="link-button" type="button">Admin</button>
+            </div>
+          </div>
+
+          <div id="adminGate" class="access-box hidden">
+            <label>
+              <span>Admin Password</span>
+              <input id="adminPasswordInput" type="password" autocomplete="off" placeholder="Enter admin password">
+            </label>
+            <button id="adminUnlockButton" class="secondary-button" type="button">Open Admin View</button>
+            <p id="adminUnlockStatus" class="status-line"></p>
+          </div>
+        </section>
+
+        <section id="workSurface" class="work-surface hidden">
+          <nav class="tabbar" aria-label="App sections">
+            <button class="tab-button active" type="button" data-tab="today">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3m8-3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>
+              Today
+            </button>
+            <button class="tab-button" type="button" data-tab="export">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+              Export
+            </button>
+            <button class="tab-button admin-only hidden" type="button" data-tab="schedule">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M5 6h14M5 18h9"/></svg>
+              Schedule
+            </button>
+            <button class="tab-button admin-only hidden" type="button" data-tab="activity">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5m0 14h16M8 16v-5m4 5V8m4 8v-8"/></svg>
+              Activity
+            </button>
+            <button class="tab-button admin-only hidden" type="button" data-tab="cards">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h9l3 3v13H6zM14 4v4h4M9 12h6M9 16h6"/></svg>
+              Activities
+            </button>
+          </nav>
+
+          <section id="todayTab" class="tab-panel active" aria-labelledby="todayTitle">
+            <div class="section-heading compact">
+              <div>
+                <h2 id="todayTitle">Study Activity</h2>
+                <p id="cardMeta">Loading schedule...</p>
+              </div>
+            </div>
+            <p id="nextDueMeta" class="next-due-meta">Next activity: loading...</p>
+
+            <div id="noDueBox" class="empty-state hidden">
+              <h3>No study activity due today</h3>
+              <p>Activities are available only on their scheduled due date through 11:59 PM Central Time.</p>
+            </div>
+
+            <article id="learningCard" class="learning-card">
+              <div id="contentMedia" class="media-frame"></div>
+              <div class="card-copy">
+                <p id="contentType" class="content-type">Placeholder content type</p>
+                <h3 id="contentTitle">Placeholder title</h3>
+                <p id="contentPrompt">Placeholder question</p>
+                <div id="answerChoices" class="choice-list"></div>
+                <div id="feedbackBox" class="feedback hidden"></div>
+                <div class="card-actions">
+                  <button id="completeButton" class="primary-button" type="button">Mark Complete</button>
+                  <div id="participantFormLinkBox" class="participant-form-link-box hidden">
+                    <a id="participantCompletionFormLink" class="primary-button form-link-button" href="#" target="_blank" rel="noopener">Open Progress Check-In Form</a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section id="exportTab" class="tab-panel" aria-labelledby="exportTitle">
+            <div class="section-heading compact">
+              <div>
+                <h2 id="exportTitle">Exports</h2>
+                <p>Calendar reminders and admin recovery export.</p>
+              </div>
+            </div>
+            <div class="export-grid">
+              <article class="export-box">
+                <h3>Reminder Calendar</h3>
+                <button id="downloadCalendarButton" class="primary-button" type="button">Download .ics</button>
+              </article>
+              <article class="export-box admin-only hidden">
+                <h3>Admin CSV Backup</h3>
+                <button id="downloadCsvButton" class="secondary-button" type="button">Download CSV</button>
+              </article>
+            </div>
+            <p id="exportStatus" class="status-line"></p>
+          </section>
+
+          <section id="scheduleTab" class="tab-panel admin-only hidden" aria-labelledby="scheduleTitle">
+            <div class="section-heading compact">
+              <div>
+                <h2 id="scheduleTitle">Admin Schedule</h2>
+                <p>Production schedule and local testing presets.</p>
+              </div>
+              <button id="regeneratePlanButton" class="secondary-button" type="button">Regenerate</button>
+            </div>
+            <div class="metrics-grid">
+              <div><strong id="plannedCount">0</strong><span>planned</span></div>
+              <div><strong id="completedCount">0</strong><span>completed</span></div>
+              <div><strong id="viewedCount">0</strong><span>viewed</span></div>
+            </div>
+            <div class="testing-schedule-panel">
+              <div>
+                <h3>Testing Schedule</h3>
+                <p id="scheduleModeStatus">Production weekly Saturdays at 8:00 AM Central.</p>
+              </div>
+              <div class="schedule-preset-grid" role="group" aria-label="Schedule presets">
+                <button class="secondary-button schedule-preset-button" type="button" data-schedule-mode="production">Production weekly Saturdays</button>
+                <button class="secondary-button schedule-preset-button" type="button" data-schedule-mode="test" data-test-interval="3">Every 3 minutes</button>
+                <button class="secondary-button schedule-preset-button" type="button" data-schedule-mode="test" data-test-interval="5">Every 5 minutes</button>
+                <button class="secondary-button schedule-preset-button" type="button" data-schedule-mode="test" data-test-interval="10">Every 10 minutes</button>
+                <button class="secondary-button schedule-preset-button" type="button" data-schedule-mode="test" data-test-interval="15">Every 15 minutes</button>
+              </div>
+            </div>
+            <div class="schedule-list" id="scheduleList"></div>
+          </section>
+
+          <section id="activityTab" class="tab-panel admin-only hidden" aria-labelledby="activityTitle">
+            <div class="section-heading compact">
+              <div>
+                <h2 id="activityTitle">Admin Activity Log</h2>
+                <p>Local browser records only.</p>
+              </div>
+              <button id="refreshActivityButton" class="secondary-button" type="button">Refresh</button>
+            </div>
+            <div class="admin-summary" id="adminProfileSummary"></div>
+            <div id="activityList" class="activity-list"></div>
+          </section>
+
+          <section id="cardsTab" class="tab-panel admin-only hidden" aria-labelledby="cardsTitle">
+            <div class="section-heading compact">
+              <div>
+                <h2 id="cardsTitle">Admin Test Drive</h2>
+                <p>Review and test the 26 scheduled study activities.</p>
+              </div>
+            </div>
+            <div class="admin-review-box">
+              <label>
+                <span>Scheduled Activity</span>
+                <select id="adminReviewSelect"></select>
+              </label>
+              <div class="admin-review-actions">
+                <button id="adminReviewButton" class="secondary-button" type="button">Preview Selected</button>
+                <button id="adminGenerateFormLinkButton" class="primary-button" type="button">Generate Form Link</button>
+              </div>
+              <div id="adminFormLinkBox" class="admin-form-link-box hidden">
+                <a id="adminCompletionFormLink" class="primary-button form-link-button" href="#" target="_blank" rel="noopener">Open Progress Check-In Form</a>
+                <p id="adminCompletionFormUrl" class="form-url-preview"></p>
+              </div>
+              <p id="adminReviewStatus" class="status-line"></p>
+            </div>
+            <div id="cardsList" class="cards-list"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js" defer></script>
+    <script src="../shared/app-core.js" defer></script>
+  </body>
+</html>
