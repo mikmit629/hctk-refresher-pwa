@@ -35,7 +35,6 @@ TARGETS = {
 REQUIRED_HEADERS = [
     "activity_id / calendar sequence",
     "format / card type",
-    "focus / card topic",
     "title / calendar summary",
     "detail / calendar description",
     "media / card asset",
@@ -132,7 +131,6 @@ def read_refresher_sheet(workbook: Any, id_prefix: str) -> list[dict[str, Any]]:
             "activityId": activity_id,
             "sequence": sequence,
             "format": content_format,
-            "focus": cell_text(sheet, headers, row_number, "focus / card topic"),
             "title": cell_text(sheet, headers, row_number, "title / calendar summary"),
             "prompt": cell_text(sheet, headers, row_number, "detail / calendar description"),
             "mediaType": media_type,
@@ -284,7 +282,6 @@ def format_content_bank(rows: list[dict[str, Any]]) -> str:
             f"    activityId: {js_string(item['activityId'])},",
             f"    sequence: {int(item['sequence'])},",
             f"    format: {js_string(item['format'])},",
-            f"    focus: {js_string(item['focus'])},",
             f"    title: {js_string(item['title'])},",
             f"    prompt: {js_string(item['prompt'])},",
             f"    mediaType: {js_string(item['mediaType'])},",

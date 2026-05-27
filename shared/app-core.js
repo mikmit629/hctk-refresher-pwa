@@ -12,7 +12,6 @@ const HCTK_LABELS = {
   blockedBody: 'This calendar link is outside its scheduled participant due window. Cards are available only during their scheduled due window.',
   calendarInvalidBody: 'Regenerate the matching calendar or open a valid activity link.',
   contentFallback: 'Learning card',
-  focusFallback: 'Placeholder focus',
   contentTypeFallback: 'Placeholder content type',
   contentViewedDetail: 'Participant viewed the current learning card.',
   contentCompletedDetail: 'Participant marked the scheduled refresher complete.',
@@ -932,7 +931,6 @@ function renderSchedule() {
       <div class="schedule-date">${escapeHTML(formatScheduleShortLabel(item))}</div>
       <div>
         <h3>${escapeHTML(content?.title || HCTK_LABELS.contentFallback)}</h3>
-        <p>${escapeHTML(content?.focus || HCTK_LABELS.focusFallback)}</p>
       </div>
       <span class="schedule-status ${status === 'Complete' ? 'done' : ''}">${escapeHTML(status)}</span>
     `;
@@ -1003,7 +1001,6 @@ function renderCards() {
         <p class="content-type">${escapeHTML(content?.format || HCTK_LABELS.contentTypeFallback)}</p>
         <h3>Activity ${escapeHTML(formatActivityNumber(item))}: ${escapeHTML(content?.title || HCTK_LABELS.contentFallback)}</h3>
         <p><strong>Due:</strong> ${escapeHTML(formatScheduleDateTime(item))}</p>
-        <p><strong>Focus:</strong> ${escapeHTML(content?.focus || HCTK_LABELS.focusFallback)}</p>
         ${promptHTML}
         <div class="scheduled-card-actions"></div>
       </div>
@@ -1047,7 +1044,7 @@ function renderAdminReviewPicker() {
     const content = contentById(item.contentId);
     const option = document.createElement('option');
     option.value = item.id;
-    option.textContent = `Reminder ${item.sequenceNumber}/26 · ${formatScheduleShortLabel(item)} · ${content?.focus || HCTK_LABELS.contentFallback}`;
+    option.textContent = `Reminder ${item.sequenceNumber}/26 · ${formatScheduleShortLabel(item)} · ${content?.title || HCTK_LABELS.contentFallback}`;
     option.selected = item.id === state.selectedScheduleId;
     elements.adminReviewSelect.appendChild(option);
   });
