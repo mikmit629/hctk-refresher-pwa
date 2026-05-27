@@ -148,6 +148,7 @@ async function init() {
   state.pendingScheduleSettings = { ...state.scheduleSettings };
   state.calendarOpenScheduleIds = new Set(await getMeta('calendarOpenScheduleIds') || []);
   state.participantUnlocked = (await getMeta('unlocked')) === true;
+  await restoreCalendarLinkState();
   if (state.participantUnlocked && !profileReadyForParticipantUnlock(state.profile)) {
     state.participantUnlocked = false;
     await setMeta('unlocked', false);
@@ -354,6 +355,32 @@ function hydrateProfileForm() {
   elements.enrollmentDateInput.value = state.profile.enrollmentDate || todayChicagoISODate();
   elements.followUpDateInput.value = state.profile.followUpDate || '';
   elements.followUpTimeInput.value = state.profile.followUpTime || '';
+}
+
+async function restoreCalendarLinkState() {
+  const params = new URLSearchParams(window.location.search);
+  if (!linkedScheduleLabel(params)) return;
+
+  const profile = calendarLinkProfile(params);
+  if (profile) {
+    state.profile = sanitizeProfile({
+      ...state.profile,
+      ...profile
+    });
+    await setMeta('profile', state.profile);
+  }
+
+  const settings = calendarLinkScheduleSettings(params);
+  if (settings) {
+    state.scheduleSettings = sanitizeScheduleSettings(settings);
+    state.pendingScheduleSettings = { ...state.scheduleSettings };
+    await setMeta('scheduleSettings', state.scheduleSettings);
+  }
+
+  if (profileReadyForParticipantUnlock(state.profile) && calendarLinkCanUnlock(params)) {
+    state.participantUnlocked = true;
+    await setMeta('unlocked', true);
+  }
 }
 
 async function saveProfileFromForm() {
@@ -1484,6 +1511,15 @@ function labelForEvent(kind) {
 function reminderLink(item) {
   const url = new URL(defaultAppUrl());
   url.searchParams.set('activity', String(item.sequenceNumber));
+  url.searchParams.set('study_id', state.profile.studyId || '');
+  url.searchParams.set('enrollment_date', state.profile.enrollmentDate || '');
+  url.searchParams.set('follow_up_date', state.profile.followUpDate || '');
+  url.searchParams.set('follow_up_time', state.profile.followUpTime || '');
+  url.searchParams.set('schedule_mode', state.scheduleSettings.mode || SCHEDULE_MODE_PRODUCTION);
+  if (isTestScheduleMode()) {
+    url.searchParams.set('test_interval', String(state.scheduleSettings.testIntervalMinutes || ''));
+    url.searchParams.set('test_started_at', state.scheduleSettings.testStartedAt || '');
+  }
   return url.toString();
 }
 
@@ -1508,6 +1544,44 @@ function linkedScheduleLabel(params) {
 function parseActivitySequence(value) {
   const match = String(value || '').trim().match(/^0*([1-9]|1\d|2[0-6])(?:\/26)?$/);
   return match ? Number(match[1]) : 0;
+}
+
+function calendarLinkProfile(params) {
+  const profile = {};
+  const studyId = params.get('study_id') || params.get('studyId') || '';
+  const enrollmentDate = params.get('enrollment_date') || params.get('enrollmentDate') || '';
+  const followUpDate = params.get('follow_up_date') || params.get('followUpDate') || '';
+  const followUpTime = params.get('follow_up_time') || params.get('followUpTime') || '';
+  if (studyId) profile.studyId = studyId;
+  if (isISODate(enrollmentDate)) profile.enrollmentDate = enrollmentDate;
+  if (isISODate(followUpDate)) profile.followUpDate = followUpDate;
+  if (isLocalTime(followUpTime)) profile.followUpTime = followUpTime;
+  return Object.keys(profile).length ? profile : null;
+}
+
+function calendarLinkScheduleSettings(params) {
+  const mode = params.get('schedule_mode') || params.get('scheduleMode') || '';
+  if (mode === SCHEDULE_MODE_TEST) {
+    const interval = Number(params.get('test_interval') || params.get('testInterval') || 0);
+    const startedAt = params.get('test_started_at') || params.get('testStartedAt') || '';
+    return {
+      mode: SCHEDULE_MODE_TEST,
+      testIntervalMinutes: TEST_INTERVAL_OPTIONS.includes(interval) ? interval : TEST_INTERVAL_OPTIONS[0],
+      testStartedAt: isValidDate(startedAt) ? startedAt : new Date().toISOString()
+    };
+  }
+  if (mode === SCHEDULE_MODE_PRODUCTION) return defaultScheduleSettings();
+  return null;
+}
+
+function calendarLinkCanUnlock(params) {
+  return Boolean(
+    linkedScheduleLabel(params) &&
+    (params.get('study_id') || params.get('studyId')) &&
+    isISODate(params.get('enrollment_date') || params.get('enrollmentDate')) &&
+    isISODate(params.get('follow_up_date') || params.get('followUpDate')) &&
+    isLocalTime(params.get('follow_up_time') || params.get('followUpTime'))
+  );
 }
 
 function openBlankCompletionFormWindow() {
