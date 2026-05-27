@@ -600,7 +600,7 @@ function renderLearningCard() {
   const participantCompleted = participantInteract && Boolean(completionEvent);
   elements.completeButton.classList.toggle('hidden', !participantInteract || participantCompleted);
   renderParticipantCompletionLink(item, participantCompleted ? completionEvent : null);
-  renderSourceAttributions(content, participantCompleted);
+  renderSourceAttributions(content);
 
   const choices = Array.isArray(content.choices) ? content.choices : [];
   if (choices.length) {
@@ -802,12 +802,12 @@ function renderParticipantCompletionLink(item, completionEvent) {
   elements.participantCompletionFormLink.href = url;
 }
 
-function renderSourceAttributions(content, show) {
+function renderSourceAttributions(content) {
   if (!elements.sourceAttributions) return;
   elements.sourceAttributions.innerHTML = '';
 
   const references = citationReferenceLines(content);
-  if (!show || !references.length) {
+  if (!references.length) {
     elements.sourceAttributions.classList.add('hidden');
     return;
   }
