@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hctk-control-pwa-v30';
+const CACHE_NAME = 'hctk-control-pwa-v34';
 const APP_SHELL = [
   './',
   './index.html',

@@ -393,54 +393,54 @@ function showSaveState(message) {
 
 async function selectInitialSchedule() {
   const params = new URLSearchParams(window.location.search);
-  const scheduleId = params.get('schedule');
-  const bySchedule = state.plan.find((item) => item.id === scheduleId);
+  const linkedActivity = linkedScheduleItem(params);
+  const linkLabel = linkedScheduleLabel(params);
   const currentItem = currentParticipantScheduleItem();
   state.calendarLinkStatus = null;
 
-  if (!scheduleId) {
+  if (!linkLabel) {
     state.selectedScheduleId = currentItem?.id || null;
     return false;
   }
 
-  if (!bySchedule) {
+  if (!linkedActivity) {
     state.selectedScheduleId = null;
     state.calendarLinkStatus = {
       kind: 'invalid',
-      scheduleId
+      scheduleId: linkLabel
     };
     return true;
   }
 
-  const validParticipantLink = isParticipantScheduleLinkRenderable(bySchedule, currentItem);
+  const validParticipantLink = isParticipantScheduleLinkRenderable(linkedActivity, currentItem);
 
   if (state.adminUnlocked) {
-    state.selectedScheduleId = bySchedule.id;
+    state.selectedScheduleId = linkedActivity.id;
     state.calendarLinkStatus = validParticipantLink
       ? {
         kind: 'valid',
-        scheduleId: bySchedule.id
+        scheduleId: linkedActivity.id
       }
       : {
         kind: 'adminOverride',
-        scheduleId: bySchedule.id
+        scheduleId: linkedActivity.id
       };
     return true;
   }
 
-  state.selectedScheduleId = validParticipantLink ? bySchedule.id : null;
+  state.selectedScheduleId = validParticipantLink ? linkedActivity.id : null;
   state.calendarLinkStatus = validParticipantLink
     ? {
       kind: 'valid',
-      scheduleId: bySchedule.id
+      scheduleId: linkedActivity.id
     }
     : {
       kind: 'blocked',
-      scheduleId: bySchedule.id
+      scheduleId: linkedActivity.id
     };
 
-  if (validParticipantLink && !state.calendarOpenScheduleIds.has(bySchedule.id)) {
-    state.calendarOpenScheduleIds.add(bySchedule.id);
+  if (validParticipantLink && !state.calendarOpenScheduleIds.has(linkedActivity.id)) {
+    state.calendarOpenScheduleIds.add(linkedActivity.id);
     await setMeta('calendarOpenScheduleIds', [...state.calendarOpenScheduleIds]);
   }
 
@@ -482,7 +482,8 @@ async function selectAdminSchedule(scheduleId) {
   state.selectedScheduleId = scheduleId;
   state.calendarLinkStatus = null;
   const url = new URL(window.location.href);
-  url.searchParams.set('schedule', scheduleId);
+  url.searchParams.delete('schedule');
+  url.searchParams.set('activity', String(item.sequenceNumber));
   window.history.replaceState({}, '', url);
   await recordEvent('admin_test_card_previewed', HCTK_LABELS.adminPreviewDetail, {
     scheduleId: item.id,
@@ -776,7 +777,7 @@ function renderNoDueState() {
 
   if (status?.kind === 'invalid') {
     heading.textContent = 'Calendar link not recognized';
-    body.textContent = `The schedule link "${status.scheduleId}" was not found in the current local plan. ${HCTK_LABELS.calendarInvalidBody}`;
+    body.textContent = `The activity link "${status.scheduleId}" was not found in the current local plan. ${HCTK_LABELS.calendarInvalidBody}`;
     return;
   }
 
@@ -1097,6 +1098,7 @@ async function downloadCalendar() {
     elements.exportStatus.textContent = 'Set Study ID, Follow-up Date, and Follow-up Time before downloading the calendar.';
     return;
   }
+  await refreshPlanForCalendarExport();
   const ics = makeCalendarICS();
   const filename = isTestScheduleMode() ? HCTK_LABELS.testIcsFilename : HCTK_LABELS.icsFilename;
   downloadTextFile(ics, filename, 'text/calendar;charset=utf-8');
@@ -1106,6 +1108,18 @@ async function downloadCalendar() {
   });
   elements.exportStatus.textContent = 'Calendar file downloaded. Import it into the device calendar to schedule reminders.';
   await refreshAll();
+}
+
+async function refreshPlanForCalendarExport() {
+  const selectedScheduleId = state.selectedScheduleId;
+  state.plan = generatePlan(state.profile, state.scheduleSettings);
+  if (!state.plan.some((item) => item.id === selectedScheduleId)) {
+    state.selectedScheduleId = currentParticipantScheduleItem()?.id || null;
+  }
+  await setMeta('plan', state.plan);
+  await setMeta('scheduleSettings', state.scheduleSettings);
+  await setMeta('schedulePolicyVersion', activeSchedulePolicyVersion());
+  await setMeta('contentBankVersion', CONTENT_BANK_VERSION);
 }
 
 async function downloadCSV() {
@@ -1149,14 +1163,10 @@ function makeCalendarICS() {
     const content = contentById(item.contentId);
     const link = reminderLink(item);
     const calendarContent = calendarContentForEvent(content);
-    const descriptionLines = [`Title: ${calendarContent.title}`];
-    if (calendarContent.detailText) {
-      descriptionLines.push(`${calendarContent.detailLabel}: ${calendarContent.detailText}`);
-    }
-    descriptionLines.push(
-      `Focus: ${content?.focus || HCTK_LABELS.calendarDescriptionFocusFallback}`,
+    const descriptionLines = [
+      calendarContent.title,
       `Open: ${link}`
-    );
+    ];
     const start = calendarEventStart(item);
     const endDate = calendarEventEnd(item);
 
@@ -1219,7 +1229,8 @@ function addFollowUpCalendarEvents(lines) {
   const visitEnd = addMinutesToLocalDate(state.profile.followUpDate, visitHour, visitMinute, FOLLOW_UP_VISIT_DURATION_MINUTES);
   const visitDescription = [
     `Study ID: ${state.profile.studyId || ''}`,
-    `Follow-up Visit: ${formatFollowUpDateTime()}`
+    `Follow-up Visit: ${formatFollowUpDateTime()}`,
+    `Open: ${link}`
   ];
 
   lines.push(
@@ -1230,6 +1241,7 @@ function addFollowUpCalendarEvents(lines) {
     `DTEND;TZID=${CENTRAL_TIME_ZONE}:${visitEnd}`,
     `SUMMARY:${escapeICS(HCTK_LABELS.followUpVisitSummary)}`,
     `DESCRIPTION:${escapeICS(visitDescription.join('\n'))}`,
+    `URL;VALUE=URI:${link}`,
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'TRIGGER:-PT0M',
@@ -1452,8 +1464,31 @@ function labelForEvent(kind) {
 
 function reminderLink(item) {
   const url = new URL(defaultAppUrl());
-  url.searchParams.set('schedule', item.id);
+  url.searchParams.set('activity', String(item.sequenceNumber));
   return url.toString();
+}
+
+function linkedScheduleItem(params) {
+  const scheduleId = params.get('schedule');
+  if (scheduleId) {
+    return state.plan.find((item) => item.id === scheduleId) || null;
+  }
+
+  const sequenceNumber = parseActivitySequence(params.get('activity'));
+  if (!sequenceNumber) return null;
+  return state.plan.find((item) => item.sequenceNumber === sequenceNumber) || null;
+}
+
+function linkedScheduleLabel(params) {
+  const scheduleId = params.get('schedule');
+  if (scheduleId) return scheduleId;
+  const activity = params.get('activity');
+  return activity ? `activity=${activity}` : '';
+}
+
+function parseActivitySequence(value) {
+  const match = String(value || '').trim().match(/^0*([1-9]|1\d|2[0-6])(?:\/26)?$/);
+  return match ? Number(match[1]) : 0;
 }
 
 function openBlankCompletionFormWindow() {
@@ -1754,6 +1789,7 @@ function showActionStatus(element, message) {
 function clearScheduleParam() {
   const url = new URL(window.location.href);
   url.searchParams.delete('schedule');
+  url.searchParams.delete('activity');
   window.history.replaceState({}, '', url);
 }
 
