@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hctk-serverless-pwa-v49';
+const CACHE_NAME = 'hctk-serverless-pwa-v50';
 const APP_SHELL = [
   './',
   './index.html',

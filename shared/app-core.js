@@ -47,7 +47,8 @@ const COMPLETION_FORM_FIELDS = {
   studyId: 'r2178fbad41b2426994714509642a02c2',
   completionDate: 'r8cd768648e32429dac3999f87beb88bd',
   activityNumber: 'r3c5305e447944b5f84b8689a2f46204d',
-  openedFromCalendarNotification: 'r7946ff1c242b43bc84df050bbb336bb4'
+  openedFromCalendarNotification: 'r7946ff1c242b43bc84df050bbb336bb4',
+  learningActivityAnswer: 'rbb6edf4d3c034114b57ddf0adb284f47'
 };
 const FOLLOW_UP_FORM_URL = 'https://forms.office.com/Pages/ResponsePage.aspx?id=ex-PmxOwcUSoxJmhXsyLHASfr2nPNIdAniE9JM-Weq5UNkJCWUREVVRGU0pVUFFHS1VOVUY5NjU5UC4u';
 const FOLLOW_UP_FORM_FIELDS = {
@@ -512,7 +513,7 @@ async function generateAdminCompletionLink() {
   }
 
   const generatedAt = new Date().toISOString();
-  const completionFormUrl = buildCompletionFormUrl(generatedAt, item);
+  const completionFormUrl = buildCompletionFormUrl(generatedAt, item, { adminTest: true });
   state.adminCompletionLink = {
     scheduleId: item.id,
     generatedAt,
@@ -596,13 +597,15 @@ function renderLearningCard() {
   elements.feedbackBox.classList.add('hidden');
   elements.feedbackBox.textContent = '';
   elements.answerChoices.innerHTML = '';
+  const choices = Array.isArray(content.choices) ? content.choices : [];
   const completionEvent = firstEventForSchedule(item.id, ['content_completed']);
   const participantCompleted = participantInteract && Boolean(completionEvent);
-  elements.completeButton.classList.toggle('hidden', !participantInteract || participantCompleted);
+  const participantAnswerEvent = latestEventForSchedule(item.id, ['question_answered']);
+  const needsParticipantAnswer = participantInteract && choices.length > 0;
+  elements.completeButton.classList.toggle('hidden', !participantInteract || participantCompleted || (needsParticipantAnswer && !participantAnswerEvent));
   renderParticipantCompletionLink(item, participantCompleted ? completionEvent : null);
   renderSourceAttributions(content);
 
-  const choices = Array.isArray(content.choices) ? content.choices : [];
   if (choices.length) {
     choices.forEach((choice, index) => {
       const button = document.createElement('button');
@@ -626,6 +629,8 @@ function renderLearningCard() {
           scheduleId: item.id,
           contentId: content.id,
           choiceIndex: index + 1,
+          choiceLetter: choiceLetter(index),
+          choiceText: choice,
           correct: isCorrect,
           adminTest: adminPreview,
           activityNumber: adminPreview ? formatActivityNumber(item) : ''
@@ -634,6 +639,9 @@ function renderLearningCard() {
         renderMetrics();
         renderSchedule();
         renderActivity();
+        if (!adminPreview && participantInteract) {
+          elements.completeButton.classList.remove('hidden');
+        }
       });
       elements.answerChoices.appendChild(button);
     });
@@ -1460,6 +1468,12 @@ function firstEventForSchedule(scheduleId, kinds) {
     .sort((left, right) => left.timestamp.localeCompare(right.timestamp))[0] || null;
 }
 
+function latestEventForSchedule(scheduleId, kinds) {
+  return state.events
+    .filter((event) => event.scheduleId === scheduleId && kinds.includes(event.kind))
+    .sort((left, right) => right.timestamp.localeCompare(left.timestamp))[0] || null;
+}
+
 function labelForEvent(kind) {
   return String(kind || '')
     .split('_')
@@ -1521,12 +1535,13 @@ function launchCompletionForm(targetWindow, completedAt, item) {
   }
 }
 
-function buildCompletionFormUrl(completedAt, item) {
+function buildCompletionFormUrl(completedAt, item, options = {}) {
   const url = new URL(COMPLETION_FORM_URL);
   url.searchParams.set(COMPLETION_FORM_FIELDS.studyId, state.profile.studyId || '');
   url.searchParams.set(COMPLETION_FORM_FIELDS.completionDate, microsoftPrefillDateFromTimestamp(completedAt));
   url.searchParams.set(COMPLETION_FORM_FIELDS.activityNumber, formatActivityNumber(item));
   url.searchParams.set(COMPLETION_FORM_FIELDS.openedFromCalendarNotification, openedFromCalendarNotificationValue(item?.id));
+  url.searchParams.set(COMPLETION_FORM_FIELDS.learningActivityAnswer, learningActivityAnswerValue(item, options));
   return url.toString();
 }
 
@@ -1542,6 +1557,24 @@ function buildFollowUpFormUrl() {
 function formatActivityNumber(item) {
   if (!item?.sequenceNumber) return '';
   return `${item.sequenceNumber}/${ACTIVITY_COUNT}`;
+}
+
+function learningActivityAnswerValue(item, options = {}) {
+  const content = item ? contentById(item.contentId) : null;
+  const choices = Array.isArray(content?.choices) ? content.choices : [];
+  if (!choices.length) return '';
+
+  const answerKinds = options.adminTest ? ['admin_test_question_answered'] : ['question_answered'];
+  const answerEvent = latestEventForSchedule(item.id, answerKinds);
+  const index = Number(answerEvent?.choiceIndex || 0) - 1;
+  const choice = answerEvent?.choiceText || choices[index] || '';
+  const letter = answerEvent?.choiceLetter || choiceLetter(index);
+  if (!choice && !letter) return '';
+  return choice ? `${letter}: ${choice}` : letter;
+}
+
+function choiceLetter(index) {
+  return Number.isInteger(index) && index >= 0 ? String.fromCharCode(65 + index) : '';
 }
 
 function openedFromCalendarNotificationValue(scheduleId) {
