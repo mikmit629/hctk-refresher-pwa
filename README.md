@@ -17,7 +17,7 @@
 │   ├── blank-card.svg
 │   └── cards/
 │       └── .gitkeep
-├── control/
+├── 2/
 │   ├── .nojekyll
 │   ├── README.md
 │   ├── index.html
@@ -48,5 +48,5 @@
 | `assets/app-icon.svg` | Intervention app icon |
 | `assets/blank-card.svg` | Placeholder card media |
 | `assets/cards/` | Intervention card media |
-| `control/` | Control PWA variant |
+| `2/` | Control PWA variant |
 | `tools/import_content_from_workbook.py` | Workbook content import |
