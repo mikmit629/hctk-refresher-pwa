@@ -24,7 +24,6 @@ window.HCTK_VARIANT_CONFIG = {
     "contentViewedDetail": "Participant viewed the current learning card.",
     "contentCompletedDetail": "Participant marked the scheduled refresher complete.",
     "adminPreviewDetail": "Admin opened a scheduled learning card preview.",
-    "calendarDescriptionFocusFallback": "Learning card",
     "calendarName": "HCTK Refresher Reminders",
     "icsFilename": "hctk-six-month-reminders.ics",
     "testIcsFilename": "hctk-test-reminders.ics"

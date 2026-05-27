@@ -17,7 +17,6 @@ const HCTK_LABELS = {
   contentViewedDetail: 'Participant viewed the current learning card.',
   contentCompletedDetail: 'Participant marked the scheduled refresher complete.',
   adminPreviewDetail: 'Admin opened a scheduled learning card preview.',
-  calendarDescriptionFocusFallback: 'Learning card',
   calendarName: 'HCTK Refresher Reminders',
   followUpConfirmationSummary: '6-Month Follow-Up Date Confirmation',
   followUpVisitSummary: '6-Month Follow-Up Visit',
@@ -1163,12 +1162,10 @@ function makeCalendarICS() {
     const content = contentById(item.contentId);
     const link = reminderLink(item);
     const calendarContent = calendarContentForEvent(content);
-    const descriptionLines = [
-      calendarContent.title,
-      `Open: ${link}`
-    ];
+    const descriptionLines = calendarDescriptionLines(content);
     const start = calendarEventStart(item);
     const endDate = calendarEventEnd(item);
+    const summary = `${formatActivityNumber(item)}: ${calendarContent.summary}`;
 
     lines.push(
       'BEGIN:VEVENT',
@@ -1176,13 +1173,13 @@ function makeCalendarICS() {
       `DTSTAMP:${compactUTCDateTime(new Date())}`,
       `DTSTART;TZID=${CENTRAL_TIME_ZONE}:${start}`,
       `DTEND;TZID=${CENTRAL_TIME_ZONE}:${endDate}`,
-      `SUMMARY:${escapeICS(calendarContent.summary)}`,
+      `SUMMARY:${escapeICS(summary)}`,
       `DESCRIPTION:${escapeICS(descriptionLines.join('\n'))}`,
       `URL;VALUE=URI:${link}`,
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
       'TRIGGER:-PT0M',
-      `DESCRIPTION:${escapeICS(calendarContent.alert)}`,
+      `DESCRIPTION:${escapeICS(summary)}`,
       'END:VALARM',
       'END:VEVENT'
     );
@@ -1203,8 +1200,7 @@ function addFollowUpCalendarEvents(lines) {
   const confirmationEnd = addMinutesToLocalDate(confirmationDate, REMINDER_HOUR, REMINDER_MINUTE, REMINDER_DURATION_MINUTES);
   const confirmationDescription = [
     `Study ID: ${state.profile.studyId || ''}`,
-    `Follow-up Visit: ${formatFollowUpDateTime()}`,
-    `Open: ${link}`
+    `Follow-up Visit: ${formatFollowUpDateTime()}`
   ];
 
   lines.push(
@@ -1229,8 +1225,7 @@ function addFollowUpCalendarEvents(lines) {
   const visitEnd = addMinutesToLocalDate(state.profile.followUpDate, visitHour, visitMinute, FOLLOW_UP_VISIT_DURATION_MINUTES);
   const visitDescription = [
     `Study ID: ${state.profile.studyId || ''}`,
-    `Follow-up Visit: ${formatFollowUpDateTime()}`,
-    `Open: ${link}`
+    `Follow-up Visit: ${formatFollowUpDateTime()}`
   ];
 
   lines.push(
@@ -1252,18 +1247,31 @@ function addFollowUpCalendarEvents(lines) {
 }
 
 function calendarContentForEvent(content) {
-  const format = cleanCalendarText(content?.format, HCTK_LABELS.contentTypeFallback);
   const title = cleanCalendarText(content?.title, HCTK_LABELS.contentFallback);
-  const detailText = cleanCalendarText(content?.prompt, '');
-  const detailLabel = /question/i.test(format) ? 'Question' : 'Detail';
 
   return {
-    title,
-    detailLabel,
-    detailText,
-    summary: title,
-    alert: title
+    summary: title
   };
+}
+
+function calendarDescriptionLines(content) {
+  const lines = [];
+  const detailText = cleanCalendarText(content?.prompt, '');
+  const choices = Array.isArray(content?.choices) ? content.choices.map((choice) => cleanCalendarText(choice, '')) : [];
+  const realChoices = choices.filter(Boolean);
+
+  if (detailText) {
+    lines.push(detailText);
+  }
+
+  if (realChoices.length) {
+    lines.push('Choices:');
+    realChoices.forEach((choice, index) => {
+      lines.push(`- ${String.fromCharCode(65 + index)}: ${choice}`);
+    });
+  }
+
+  return lines;
 }
 
 function cleanCalendarText(value, fallback) {
