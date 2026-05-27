@@ -16,11 +16,11 @@ const HCTK_LABELS = {
   contentViewedDetail: 'Participant viewed the current learning card.',
   contentCompletedDetail: 'Participant marked the scheduled refresher complete.',
   adminPreviewDetail: 'Admin opened a scheduled learning card preview.',
-  calendarName: 'HCTK Refresher Reminders',
+  calendarName: 'TKHC',
   followUpConfirmationSummary: '6-Month Follow-Up Date Confirmation',
   followUpVisitSummary: '6-Month Follow-Up Visit',
-  icsFilename: 'hctk-six-month-reminders.ics',
-  testIcsFilename: 'hctk-test-reminders.ics',
+  icsFilename: 'TKHC.ics',
+  testIcsFilename: 'TKHC.ics',
   ...(HCTK_CONFIG.labels || {})
 };
 
@@ -1542,7 +1542,7 @@ function buildCompletionFormUrl(completedAt, item, options = {}) {
   url.searchParams.set(COMPLETION_FORM_FIELDS.activityNumber, formatActivityNumber(item));
   url.searchParams.set(COMPLETION_FORM_FIELDS.openedFromCalendarNotification, openedFromCalendarNotificationValue(item?.id));
   url.searchParams.set(COMPLETION_FORM_FIELDS.learningActivityAnswer, learningActivityAnswerValue(item, options));
-  return url.toString();
+  return microsoftFormUrlString(url);
 }
 
 function buildFollowUpFormUrl() {
@@ -1551,7 +1551,11 @@ function buildFollowUpFormUrl() {
   if (state.profile.followUpDate) {
     url.searchParams.set(FOLLOW_UP_FORM_FIELDS.followUpDate, `"${state.profile.followUpDate}"`);
   }
-  return url.toString();
+  return microsoftFormUrlString(url);
+}
+
+function microsoftFormUrlString(url) {
+  return url.toString().replace(/\+/g, '%20');
 }
 
 function formatActivityNumber(item) {

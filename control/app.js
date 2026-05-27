@@ -23,9 +23,9 @@ window.HCTK_VARIANT_CONFIG = {
     "contentViewedDetail": "Participant viewed the current study activity.",
     "contentCompletedDetail": "Participant marked the scheduled study activity complete.",
     "adminPreviewDetail": "Admin opened a scheduled study activity preview.",
-    "calendarName": "HCTK Study Activity Reminders",
-    "icsFilename": "hctk-control-six-month-reminders.ics",
-    "testIcsFilename": "hctk-control-test-reminders.ics"
+    "calendarName": "TKHC",
+    "icsFilename": "TKHC.ics",
+    "testIcsFilename": "TKHC.ics"
   }
 };
 
