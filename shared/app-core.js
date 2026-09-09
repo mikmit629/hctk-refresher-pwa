@@ -154,11 +154,22 @@ async function init() {
     await setMeta('unlocked', false);
   }
 
+  // A blank setup saved by an earlier visit is not an enrolled participant.
+  const today = todayChicagoISODate();
+  const enrollmentDateRefreshed = !state.participantUnlocked &&
+    !state.profile.studyId && !state.profile.followUpDate && !state.profile.followUpTime &&
+    !linkedScheduleLabel(new URLSearchParams(window.location.search)) &&
+    state.profile.enrollmentDate !== today;
+  if (enrollmentDateRefreshed) {
+    state.profile.enrollmentDate = today;
+  }
+
   const savedPolicyVersion = await getMeta('schedulePolicyVersion');
   const savedContentBankVersion = await getMeta('contentBankVersion');
   state.plan = await getMeta('plan') || [];
   if (
     !state.plan.length ||
+    enrollmentDateRefreshed ||
     savedPolicyVersion !== activeSchedulePolicyVersion() ||
     savedContentBankVersion !== CONTENT_BANK_VERSION ||
     !planUsesCurrentContentBank(state.plan)
