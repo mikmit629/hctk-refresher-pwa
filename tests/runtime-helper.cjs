@@ -28,8 +28,6 @@ function activityQuery(overrides = {}) {
   });
 }
 
-// Only the DOM methods needed by runtime logic are mocked. Actual visual
-// rendering, service-worker registration and browser navigation need a UI smoke test.
 function element() {
   return {
     value: '', textContent: '', children: [], dataset: {}, listeners: {},
@@ -83,8 +81,6 @@ async function boot({ variant, search = '', now = '2026-10-10T15:00:00Z', forbid
     Date: Clock, URL, URLSearchParams, Intl, console, crypto: { randomUUID },
     observations, window, document, navigator: {}, setTimeout
   });
-  // Fail on any browser storage access, including reads of legacy participant
-  // databases. These guards also catch writes and automatic deletion attempts.
   for (const storage of ['indexedDB', 'localStorage', 'sessionStorage']) {
     for (const target of [context, window]) {
       Object.defineProperty(target, storage, {

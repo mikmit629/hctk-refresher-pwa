@@ -1,11 +1,11 @@
-const CACHE_NAME = 'hctk-serverless-pwa-v69';
+const CACHE_NAME = 'hctk-serverless-pwa-v70';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
-  './app.js?v=69',
+  './app.js?v=70',
   './shared/styles.css',
-  './shared/app-core.js?v=69',
+  './shared/app-core.js?v=70',
   './manifest.webmanifest',
   './assets/app-icon.svg',
   './assets/blank-card.svg'
@@ -47,7 +47,6 @@ self.addEventListener('fetch', (event) => {
             }
             await cache.put('./index.html', response.clone());
           } catch {
-            // A storage failure must not hide a usable network response.
           }
           return response;
         })
@@ -57,7 +56,6 @@ self.addEventListener('fetch', (event) => {
             const cached = await cache.match('./index.html');
             if (cached) return cached;
           } catch {
-            // No usable offline copy is available; preserve the network failure.
           }
           throw error;
         })

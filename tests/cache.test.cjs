@@ -98,7 +98,6 @@ for (const variant of variants) {
     }
     assert.equal(puts.length, 0);
 
-    // Navigating online stores only the generic public shell cache key.
     online = true;
     await request(base + '?activity=20&study_id=LOCAL-A', 'navigate');
     assert.deepEqual(puts, [['./index.html', 'PUBLIC RESPONSE']]);

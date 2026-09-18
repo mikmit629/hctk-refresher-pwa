@@ -76,7 +76,6 @@ for (const variant of ['intervention', 'control']) {
         assert.equal(next?.sequenceNumber ?? null, sequence);
         assert.equal(next?.date ?? null, date);
         if (next) assert.equal(next.localTime, '10:00');
-        // The upcoming reminder is only a description; the URL still selects 20.
         assert.equal(app.run('state.linkedActivity.sequenceNumber'), 20);
         if (next) {
           assert.equal(app.nodes.get('#nextDueMeta').textContent,

@@ -86,8 +86,6 @@ for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
         assert.equal(fields.get('study_group'), groupCode);
         assert.equal(fields.get('activity_number'), '20/26');
       }
-      // A later selection without another handoff must not rewrite the link
-      // that reopens the participant's already prepared submission.
       app.run(`recordEvent('question_answered','Not handed off', {
         scheduleId:state.linkedActivity.id, choiceLetter:'D', choiceText:'Unsent answer'
       })`);

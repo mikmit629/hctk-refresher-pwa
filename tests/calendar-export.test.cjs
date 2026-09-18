@@ -2,7 +2,6 @@ const assert = require('node:assert/strict');
 const { describe, it } = require('node:test');
 const { boot, activityQuery, testTiming } = require('./runtime-helper.cjs');
 
-// Model an ICS importer that unfolds lines and preserves DESCRIPTION but drops URL.
 function calendarEvents(calendar) {
   return calendar.replace(/\r\n[ \t]/g, '').split('BEGIN:VEVENT\r\n').slice(1).map((block) => {
     const event = block.split('END:VEVENT')[0];

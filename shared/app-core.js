@@ -114,7 +114,6 @@ const elements = {
   exportStatus: document.querySelector('#exportStatus')
 };
 
-// Participant details and diagnostics exist only in this page instance.
 const state = {
   linkedActivity: null,
   adminPreviewItem: null,
@@ -178,7 +177,6 @@ function initializeVisit() {
       state.linkedActivity = item;
       state.participantUnlocked = true;
     } catch {
-      // Invalid links retain the fresh setup above, without a stale query on reload.
       window.history.replaceState(null, '', new URL('./', window.location.href).href);
     }
   }
@@ -195,7 +193,6 @@ function isCalendarTimestamp(value) {
     Number(value.slice(17, 19)) < 60 && isValidDate(value);
 }
 
-// Resolve content directly. Timing describes this one activity, never a plan lookup.
 function directActivity(sequence, profile = state.profile, settings = state.scheduleSettings) {
   const content = CONTENT_BANK.find((entry) => entry.sequence === sequence);
   if (!content) return null;
@@ -906,8 +903,6 @@ function renderNextDueMeta() {
     : 'No remaining activities are scheduled.';
 }
 
-// Find only the next reminder after now. This never selects participant content
-// or creates a schedule, and it stops after the 26 exported activity reminders.
 function nextCalendarActivity(now = new Date()) {
   if (!profileReadyForParticipantUnlock(state.profile) ||
       !isCalendarDate(state.profile.enrollmentDate)) return null;
@@ -1123,7 +1118,6 @@ async function downloadCalendar() {
   refreshPlanForCalendarExport();
   const ics = makeCalendarICS();
   const filename = isTestScheduleMode() ? HCTK_LABELS.testIcsFilename : HCTK_LABELS.icsFilename;
-  // Android intent matching needs the bare MIME type; Blob strings stay UTF-8.
   downloadTextFile(ics, filename, 'text/calendar');
   recordEvent('calendar_export_created', 'Generated reminder calendar file.', {
     scheduleMode: state.scheduleSettings.mode,
@@ -1182,7 +1176,6 @@ function makeCalendarICS() {
     const link = reminderLink(item);
     const calendarContent = calendarContentForEvent(content);
     const descriptionLines = calendarDescriptionLines(content);
-    // Preserve links in calendar apps that retain notes but ignore the URL property.
     descriptionLines.unshift('Open activity:', link, '');
     const start = calendarEventStart(item);
     const endDate = calendarEventEnd(item);
@@ -1458,8 +1451,6 @@ function firstEventForSchedule(scheduleId, kinds) {
 }
 
 function latestEventForSchedule(scheduleId, kinds) {
-  // recordEvent keeps events in timestamp order, preserving insertion order
-  // for ties. Scan backward so the last selection wins even in the same tick.
   for (let index = state.events.length - 1; index >= 0; index -= 1) {
     const event = state.events[index];
     if (event.scheduleId === scheduleId && kinds.includes(event.kind)) return event;

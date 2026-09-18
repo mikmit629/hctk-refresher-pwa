@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Import HCTK activity content into the refresher PWA."""
 
 from __future__ import annotations
 
