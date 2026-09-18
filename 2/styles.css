@@ -1,0 +1,7 @@
+@import url('../shared/styles.css');
+
+:root {
+  --accent: #2f7d73;
+  --accent-soft: #e4f2ef;
+  --bg-wash: rgba(47, 125, 115, 0.08);
+}
