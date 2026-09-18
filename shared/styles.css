@@ -149,16 +149,6 @@ main {
   line-height: 1.45;
 }
 
-.status-pill {
-  flex: 0 0 auto;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  padding: 5px 9px;
-  color: var(--muted);
-  background: var(--surface-2);
-  font-size: 0.78rem;
-}
-
 .profile-grid,
 .access-box {
   display: grid;

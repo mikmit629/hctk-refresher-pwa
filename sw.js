@@ -1,11 +1,11 @@
-const CACHE_NAME = 'hctk-serverless-pwa-v70';
+const CACHE_NAME = 'hctk-serverless-pwa-v71';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
-  './app.js?v=70',
+  './app.js?v=71',
   './shared/styles.css',
-  './shared/app-core.js?v=70',
+  './shared/app-core.js?v=71',
   './manifest.webmanifest',
   './assets/app-icon.svg',
   './assets/blank-card.svg'

@@ -1,17 +1,10 @@
 window.HCTK_VARIANT_CONFIG = {
-  "variant": "intervention",
   "submissionGroupCode": "A",
   "scheduleIdPrefix": "hctk",
   "uidDomain": "hctk-serverless-pwa",
   "prodId": "-//HCTK//Intervention PWA//EN",
-  "themeColor": "#b8282d",
   "labels": {
-    "cardsTabLabel": "Cards",
-    "itemNoun": "card",
-    "itemPlural": "cards",
     "todayTitle": "Learning Card",
-    "nextDueLoading": "Next card: loading...",
-    "defaultPrompt": "Placeholder question",
     "noDueHeading": "No learning card due today",
     "noDueBody": "",
     "blockedHeading": "No learning card due from this link",

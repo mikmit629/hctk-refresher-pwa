@@ -1,17 +1,10 @@
 window.HCTK_VARIANT_CONFIG = {
-  "variant": "control",
   "submissionGroupCode": "B",
   "scheduleIdPrefix": "hctk-control",
   "uidDomain": "hctk-control-pwa",
   "prodId": "-//HCTK//Control PWA//EN",
-  "themeColor": "#2f7d73",
   "labels": {
-    "cardsTabLabel": "Activities",
-    "itemNoun": "activity",
-    "itemPlural": "activities",
     "todayTitle": "Study Activity",
-    "nextDueLoading": "Next activity: loading...",
-    "defaultPrompt": "Placeholder question",
     "noDueHeading": "No study activity due today",
     "noDueBody": "",
     "blockedHeading": "No study activity due from this link",

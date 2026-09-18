@@ -1,11 +1,6 @@
 const HCTK_CONFIG = window.HCTK_VARIANT_CONFIG || {};
 const HCTK_LABELS = {
-  cardsTabLabel: 'Cards',
-  itemNoun: 'card',
-  itemPlural: 'cards',
   todayTitle: 'Learning Card',
-  nextDueLoading: 'Next card: loading...',
-  defaultPrompt: 'Placeholder question',
   noDueHeading: 'No learning card due today',
   noDueBody: '',
   blockedHeading: 'No learning card due from this link',
@@ -1621,13 +1616,6 @@ function scheduleStatusLabel(item, completed, viewed, today) {
   if (item.date < today) return 'Missed';
   if (item.date === today) return 'Due Today';
   return 'Planned';
-}
-
-function formatScheduleWindow(item) {
-  if (isTestScheduleItem(item)) {
-    return `Available from ${formatScheduleDateTime(item)}`;
-  }
-  return `Due ${formatDisplayDate(item.date)} until 11:59 PM Central`;
 }
 
 function formatScheduleShortLabel(item) {
