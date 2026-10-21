@@ -20,12 +20,11 @@ window.HCTK_VARIANT_CONFIG = {
   }
 };
 
-window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-341d284eec99';
+window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-1ebcb09bb6be';
 
 window.HCTK_CONTENT_BANK = [
   {
     id: 'control-content-001',
-    activityId: '1/13',
     sequence: 1,
     format: 'Question',
     title: 'Which item is commonly used to write on a whiteboard?',
@@ -33,7 +32,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Spoon',
       'Marker',
@@ -47,7 +45,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-002',
-    activityId: '2/13',
     sequence: 2,
     format: 'Question',
     title: 'How many corners does a rectangle have?',
@@ -55,7 +52,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Two',
       'Three',
@@ -69,7 +65,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-003',
-    activityId: '3/13',
     sequence: 3,
     format: 'Question',
     title: 'Which object is commonly used to tell direction?',
@@ -77,7 +72,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Compass',
       'Teacup',
@@ -91,7 +85,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-004',
-    activityId: '4/13',
     sequence: 4,
     format: 'Question',
     title: 'Which word would usually come first alphabetically?',
@@ -99,7 +92,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Apple',
       'Banana',
@@ -113,7 +105,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-005',
-    activityId: '5/13',
     sequence: 5,
     format: 'Question',
     title: 'Which tool is commonly used to measure liquid volume in a kitchen?',
@@ -121,7 +112,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Hammer',
       'Measuring cup',
@@ -135,7 +125,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-006',
-    activityId: '6/13',
     sequence: 6,
     format: 'Question',
     title: 'What is a bookmark used for?',
@@ -143,7 +132,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Stirring soup',
       'Holding a door open',
@@ -157,7 +145,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-007',
-    activityId: '7/13',
     sequence: 7,
     format: 'Question',
     title: 'What may help a houseplant when its soil is dry?',
@@ -165,7 +152,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Cover it with a book',
       'Turn off every light',
@@ -179,7 +165,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-008',
-    activityId: '8/13',
     sequence: 8,
     format: 'Question',
     title: 'What part of a map tells you what symbols mean?',
@@ -187,7 +172,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Scale bar only',
       'Page number',
@@ -201,7 +185,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-009',
-    activityId: '9/13',
     sequence: 9,
     format: 'Question',
     title: 'Which item is a musical instrument?',
@@ -209,7 +192,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Violin',
       'Backpack',
@@ -223,7 +205,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-010',
-    activityId: '10/13',
     sequence: 10,
     format: 'Question',
     title: 'Which item is commonly made of paper?',
@@ -231,7 +212,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Screwdriver',
       'Notebook',
@@ -245,7 +225,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-011',
-    activityId: '11/13',
     sequence: 11,
     format: 'Question',
     title: 'Which password habit is generally safer?',
@@ -253,7 +232,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Use the same short password everywhere',
       'Share passwords by text message',
@@ -267,7 +245,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-012',
-    activityId: '12/13',
     sequence: 12,
     format: 'Question',
     title: 'Which tool is commonly used to check temperature?',
@@ -275,7 +252,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Ruler',
       'Whisk',
@@ -289,7 +265,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'control-content-013',
-    activityId: '13/13',
     sequence: 13,
     format: 'Question',
     title: 'Where would you look to find where a chapter begins?',
@@ -297,7 +272,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Table of contents',
       'Shoe size tag',

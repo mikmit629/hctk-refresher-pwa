@@ -76,7 +76,6 @@ const elements = {
   cardMeta: document.querySelector('#cardMeta'),
   nextDueMeta: document.querySelector('#nextDueMeta'),
   contentMedia: document.querySelector('#contentMedia'),
-  contentType: document.querySelector('#contentType'),
   contentTitle: document.querySelector('#contentTitle'),
   contentPrompt: document.querySelector('#contentPrompt'),
   answerChoices: document.querySelector('#answerChoices'),
@@ -616,8 +615,6 @@ function renderLearningCard() {
   elements.cardMeta.classList.remove('hidden');
   elements.nextDueMeta.classList.add('hidden');
   renderContentMedia(content);
-  elements.contentType.textContent = content.format;
-  elements.contentType.classList.add('hidden');
   elements.contentTitle.textContent = content.title;
   elements.contentPrompt.textContent = content.prompt;
   elements.contentPrompt.classList.toggle('hidden', !content.prompt);
@@ -650,7 +647,6 @@ function renderLearningCard() {
         [...elements.answerChoices.children].forEach((child) => child.classList.remove('selected'));
         button.classList.add('selected');
         renderQuestionFeedback({
-          adminPreview,
           isCorrect,
           rationale: content.rationale
         });

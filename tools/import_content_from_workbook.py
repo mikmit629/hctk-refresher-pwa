@@ -14,7 +14,6 @@ from openpyxl import load_workbook
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 APP_DIR = SCRIPT_DIR.parent
-CODING_DIR = APP_DIR.parent
 DEFAULT_WORKBOOK = APP_DIR / "activity_spreadsheets" / "activities-13-question.xlsx"
 DEFAULT_INTERVENTION_APP = APP_DIR / "app.js"
 DEFAULT_CONTROL_APP = APP_DIR / "2" / "app.js"
@@ -122,7 +121,7 @@ def read_refresher_sheet(workbook: Any, id_prefix: str) -> list[dict[str, Any]]:
         ]
         correct_choice = cell_text(sheet, headers, row_number, "correct_choice")
         rationale = cell_text(sheet, headers, row_number, "rationale / card feedback")
-        correct_index = validate_card_fields(content_format, choices, correct_choice, rationale, row_number)
+        correct_index = validate_card_fields(choices, correct_choice, rationale, row_number)
         if not cell_text(sheet, headers, row_number, "title / calendar summary"):
             raise SystemExit(f"{SHEET_NAME} row {row_number}: missing question")
         if [line[0] for line in rationale.splitlines() if re.match(r"^[A-D]: ", line)] != list("ABCD"):
@@ -131,7 +130,6 @@ def read_refresher_sheet(workbook: Any, id_prefix: str) -> list[dict[str, Any]]:
         media_type = infer_media_type(media_path) if media_path else ""
         rows.append({
             "id": f"{id_prefix}-{sequence:03d}",
-            "activityId": activity_id,
             "sequence": sequence,
             "format": content_format,
             "title": cell_text(sheet, headers, row_number, "title / calendar summary"),
@@ -139,7 +137,6 @@ def read_refresher_sheet(workbook: Any, id_prefix: str) -> list[dict[str, Any]]:
             "mediaType": media_type,
             "mediaPath": media_path,
             "mediaAlt": "",
-            "image": media_path if media_type and media_type != "link" else "",
             "choices": [choice for choice in choices if choice],
             "correctIndex": correct_index,
             "rationale": rationale,
@@ -195,17 +192,11 @@ def validate_format(value: str, row_number: int) -> None:
 
 
 def validate_card_fields(
-    content_format: str,
     choices: list[str],
     correct_choice: str,
     rationale: str,
     row_number: int,
 ) -> int:
-    if content_format == "Fact":
-        if any(choices) or correct_choice or rationale:
-            raise SystemExit(f"{SHEET_NAME} row {row_number}: Fact rows must not include choices, correct choice, or rationale")
-        return 0
-
     if not all(choices):
         raise SystemExit(f"{SHEET_NAME} row {row_number}: Question rows must include choices A through D")
     if correct_choice not in {"a", "b", "c", "d"}:
@@ -213,29 +204,6 @@ def validate_card_fields(
     if not rationale:
         raise SystemExit(f"{SHEET_NAME} row {row_number}: Question rows must include rationale / card feedback")
     return {"a": 0, "b": 1, "c": 2, "d": 3}[correct_choice]
-
-
-def clean_rationale(value: str) -> str:
-    lines = [line.strip() for line in value.splitlines() if line.strip()]
-    has_choice_list = sum(1 for line in lines if rationale_choice_line(line)) >= 2
-    cleaned: list[str] = []
-
-    for line in lines:
-        if has_choice_list and re.match(r"^Correct answer:\s*[A-D]\b", line, flags=re.IGNORECASE):
-            continue
-        match = rationale_choice_line(line)
-        if match:
-            label = match.group(1).upper()
-            detail = re.sub(r"^Correct\.\s*", "", match.group(2), flags=re.IGNORECASE)
-            cleaned.append(f"{label}: {detail}")
-            continue
-        cleaned.append(re.sub(r"^(Correct answer:\s*[A-D]\.\s*)Correct\.\s*", r"\1", line, flags=re.IGNORECASE))
-
-    return "\n".join(cleaned)
-
-
-def rationale_choice_line(value: str) -> re.Match[str] | None:
-    return re.match(r"^([A-D])[:.)]?\s+(.+)$", value, flags=re.IGNORECASE)
 
 
 def infer_media_type(path: str) -> str:
@@ -282,7 +250,6 @@ def format_content_bank(rows: list[dict[str, Any]]) -> str:
         parts.extend([
             "  {",
             f"    id: {js_string(item['id'])},",
-            f"    activityId: {js_string(item['activityId'])},",
             f"    sequence: {int(item['sequence'])},",
             f"    format: {js_string(item['format'])},",
             f"    title: {js_string(item['title'])},",
@@ -290,7 +257,6 @@ def format_content_bank(rows: list[dict[str, Any]]) -> str:
             f"    mediaType: {js_string(item['mediaType'])},",
             f"    mediaPath: {js_string(item['mediaPath'])},",
             f"    mediaAlt: {js_string(item['mediaAlt'])},",
-            f"    image: {js_string(item['image'])},",
             "    choices: [",
         ])
         for choice_index, choice in enumerate(item["choices"]):

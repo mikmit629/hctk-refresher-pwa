@@ -20,12 +20,11 @@ window.HCTK_VARIANT_CONFIG = {
   }
 };
 
-window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-394dac339ea3';
+window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-c8fee44c468c';
 
 window.HCTK_CONTENT_BANK = [
   {
     id: 'content-001',
-    activityId: '1/13',
     sequence: 1,
     format: 'Question',
     title: 'Which finding most strongly suggests life-threatening bleeding?',
@@ -33,7 +32,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'A small scrape with slow bleeding',
       'Bleeding that stopped after one tissue',
@@ -47,7 +45,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-002',
-    activityId: '2/13',
     sequence: 2,
     format: 'Question',
     title: 'What should you check before giving care for heavy bleeding?',
@@ -55,7 +52,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'That the scene is safe enough to approach',
       'Pack the wound immediately',
@@ -69,7 +65,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-003',
-    activityId: '3/13',
     sequence: 3,
     format: 'Question',
     title: 'In a group of bystanders, which statement is the clearest way to activate emergency help?',
@@ -77,7 +72,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Someone should probably call',
       'Maybe EMS will come soon',
@@ -91,7 +85,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-004',
-    activityId: '4/13',
     sequence: 4,
     format: 'Question',
     title: 'Why should enough of the wound area be uncovered during care?',
@@ -99,7 +92,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'To make the injury look more dramatic',
       'To make sure treatment is applied directly to the bleeding source',
@@ -113,7 +105,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-005',
-    activityId: '5/13',
     sequence: 5,
     format: 'Question',
     title: 'Where should direct pressure be applied?',
@@ -121,7 +112,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Several inches away from the wound',
       'Directly over the bleeding source',
@@ -135,7 +125,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-006',
-    activityId: '6/13',
     sequence: 6,
     format: 'Question',
     title: 'While preparing packing material, what should happen to pressure on the wound?',
@@ -143,7 +132,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'It should be maintained',
       'It should be removed so the wound can air out',
@@ -157,7 +145,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-007',
-    activityId: '7/13',
     sequence: 7,
     format: 'Question',
     title: 'Which action best describes wound packing?',
@@ -165,7 +152,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Laying gauze loosely on top of the skin',
       'Putting material into the wound space and then holding pressure',
@@ -179,7 +165,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-008',
-    activityId: '8/13',
     sequence: 8,
     format: 'Question',
     title: 'What does it mean if blood is still visible through packed material?',
@@ -187,7 +172,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'The bleeding is controlled and no more action is needed',
       'The packing should be removed',
@@ -201,7 +185,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-009',
-    activityId: '9/13',
     sequence: 9,
     format: 'Question',
     title: 'Which injury is most appropriate for a tourniquet?',
@@ -209,7 +192,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Severe bleeding from the lower leg',
       'Bleeding from the abdomen',
@@ -223,7 +205,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-010',
-    activityId: '10/13',
     sequence: 10,
     format: 'Question',
     title: 'For severe bleeding from the forearm, where should the tourniquet go?',
@@ -231,7 +212,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Below the wound, closer to the hand',
       'Directly over the elbow joint',
@@ -245,7 +225,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-011',
-    activityId: '11/13',
     sequence: 11,
     format: 'Question',
     title: 'If the tourniquet strap is visibly loose before final tightening, what should be done?',
@@ -253,7 +232,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Leave it loose because pain means it is harmful',
       'Remove slack and secure the strap before tightening',
@@ -267,7 +245,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-012',
-    activityId: '12/13',
     sequence: 12,
     format: 'Question',
     title: 'A person says the tourniquet hurts after it is applied for severe limb bleeding. What should the responder do?',
@@ -275,7 +252,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'Loosen it to make the person more comfortable',
       'Remove it and restart direct pressure only',
@@ -289,7 +265,6 @@ window.HCTK_CONTENT_BANK = [
   },
   {
     id: 'content-013',
-    activityId: '13/13',
     sequence: 13,
     format: 'Question',
     title: 'Which handoff detail is most important after applying a tourniquet?',
@@ -297,7 +272,6 @@ window.HCTK_CONTENT_BANK = [
     mediaType: '',
     mediaPath: '',
     mediaAlt: '',
-    image: '',
     choices: [
       'The tourniquet application time and what bleeding-control steps were used',
       'The responder’s favorite first-aid brand',
