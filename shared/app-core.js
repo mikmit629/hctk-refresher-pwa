@@ -1868,15 +1868,23 @@ function escapeICS(value) {
 }
 
 function foldICSLine(line) {
+  // Reserve one UTF-8 byte for the space on continuation lines.
   const limit = 74;
-  if (line.length <= limit) return line;
   const chunks = [];
-  let remaining = line;
-  while (remaining.length > limit) {
-    chunks.push(remaining.slice(0, limit));
-    remaining = remaining.slice(limit);
+  let chunk = '';
+  let byteLength = 0;
+  for (const character of line) {
+    const codePoint = character.codePointAt(0);
+    const characterBytes = codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
+    if (byteLength + characterBytes > limit) {
+      chunks.push(chunk);
+      chunk = '';
+      byteLength = 0;
+    }
+    chunk += character;
+    byteLength += characterBytes;
   }
-  chunks.push(remaining);
+  chunks.push(chunk);
   return chunks.map((chunk, index) => (index === 0 ? chunk : ` ${chunk}`)).join('\r\n');
 }
 

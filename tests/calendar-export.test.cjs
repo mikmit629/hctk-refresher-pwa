@@ -21,7 +21,11 @@ for (const variant of ['intervention', 'control']) {
         const profileOverrides = { study_id: 'LOCAL + & / Ü,;\\' };
         const app = await boot({ variant, search: activityQuery({ ...profileOverrides, ...(mode === 'test' ? testTiming : {}) }), forbidPlan: false });
         app.run('refreshPlanForCalendarExport()');
-        const events = calendarEvents(app.run('makeCalendarICS()'));
+        const exported = app.run('makeCalendarICS()');
+        for (const line of exported.split('\r\n')) {
+          assert.ok(Buffer.byteLength(line, 'utf8') <= 75, `Calendar line exceeds 75 bytes: ${line}`);
+        }
+        const events = calendarEvents(exported);
         assert.equal(events.length, 15);
         const ids = new Set();
         for (let i = 0; i < events.length; i++) {
@@ -58,6 +62,40 @@ for (const variant of ['intervention', 'control']) {
         assert.equal(ids.size, 15);
       });
     }
+
+    it('folds Unicode at character boundaries and unfolds without changing text', async () => {
+      const app = await boot({ variant });
+      for (const input of [
+        '', 'A'.repeat(74), 'A'.repeat(75), 'A'.repeat(148),
+        'A'.repeat(73) + 'é', 'A'.repeat(72) + '’', 'A'.repeat(71) + '🩹',
+        'DESCRIPTION:' + 'Ü 中 🩹 e\u0301 responder’s '.repeat(12)
+      ]) {
+        const folded = app.run(`foldICSLine(${JSON.stringify(input)})`);
+        assert.equal(folded.replace(/\r\n /g, ''), input);
+        for (const [index, line] of folded.split('\r\n').entries()) {
+          assert.ok(Buffer.byteLength(line, 'utf8') <= 75);
+          if (index) assert.ok(line.startsWith(' '));
+          assert.equal(Buffer.from(line, 'utf8').toString('utf8'), line);
+        }
+      }
+      assert.equal(app.run(`foldICSLine(${JSON.stringify('A'.repeat(75))})`), 'A'.repeat(74) + '\r\n A');
+    });
+
+    it('preserves Unicode participant details in all exported activity links', async () => {
+      const studyId = 'AUDIT Ü 中文 🩹 e\u0301';
+      const app = await boot({ variant, search: activityQuery({ study_id: studyId }), forbidPlan: false });
+      app.run('refreshPlanForCalendarExport()');
+      const exported = app.run('makeCalendarICS()');
+      assert.ok(exported.split('\r\n').every((line) => Buffer.byteLength(line, 'utf8') <= 75));
+      const events = calendarEvents(exported);
+      for (const { fields, notes } of events.slice(0, 13)) {
+        assert.equal(new URL(fields['URL;VALUE=URI']).searchParams.get('study_id'), studyId.toUpperCase());
+        assert.ok(notes.includes(fields['URL;VALUE=URI']));
+      }
+      for (const { notes } of events.slice(13)) {
+        assert.ok(notes.includes(`Study ID: ${studyId.toUpperCase()}`));
+      }
+    });
 
     it('downloads one compatible file through the calendar button', async () => {
       const app = await boot({ variant, search: activityQuery(), forbidPlan: false });

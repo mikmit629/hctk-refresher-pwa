@@ -1,12 +1,12 @@
-const CACHE_NAME = 'hctk-control-pwa-v75';
+const CACHE_NAME = 'hctk-control-pwa-v76';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=75',
-  './app.js?v=75',
-  '../shared/styles.css?v=75',
-  '../shared/app-core.js?v=75',
-  './manifest.webmanifest?v=75',
+  './styles.css?v=76',
+  './app.js?v=76',
+  '../shared/styles.css?v=76',
+  '../shared/app-core.js?v=76',
+  './manifest.webmanifest?v=76',
   './assets/app-icon.svg',
   './assets/blank-card.svg'
 ];
