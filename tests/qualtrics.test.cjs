@@ -8,13 +8,14 @@ const expectedKeys = ['activity_number', 'answer', 'calendar_link', 'completion_
 for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
   const visit = (options = {}) => boot({variant, search: activityQuery(testTiming), ...options});
   describe(`${variant} Qualtrics submissions`, () => {
-    it('sends all 26 activities and every answer with Study ID and a neutral group code, without storage or a plan', async () => {
-      for (let sequence = 1; sequence <= 26; sequence++) {
-        const app = await visit({search:activityQuery({...testTiming, activity:sequence})});
-        const content = app.json('contentById(state.linkedActivity.contentId)');
+    it('sends all 13 activities and every answer with Study ID and a neutral group code, without storage or a plan', async () => {
+      for (let sequence = 1; sequence <= 13; sequence++) {
+        const preview = await visit({search:activityQuery({...testTiming, activity:sequence})});
+        const content = preview.json('contentById(state.linkedActivity.contentId)');
         assert.equal(content.sequence, sequence);
         const choices = content.choices.length ? content.choices : [''];
         for (let index = 0; index < choices.length; index++) {
+          const app = await visit({search:activityQuery({...testTiming, activity:sequence})});
           if (content.choices.length) {
             app.run(`recordEvent('question_answered', 'Test selection', {
               scheduleId:state.linkedActivity.id, contentId:state.linkedActivity.contentId,
@@ -27,7 +28,7 @@ for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
           assert.deepEqual([...url.searchParams.keys()].sort(), expectedKeys);
           assert.deepEqual(Object.fromEntries(url.searchParams), {
             study_id:'LOCAL-A', study_group:groupCode, completion_date:'2026-10-10',
-            activity_number:`${sequence}/26`, calendar_link:'Yes',
+            activity_number:`${sequence}/13`, calendar_link:'Yes',
             answer:content.choices.length ? `${'ABCD'[index]}: ${choices[index]}` : ''
           });
         }
@@ -46,7 +47,7 @@ for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
       }
     });
 
-    it('uses the last answer when timestamps tie and keeps Admin answers separate', async () => {
+    it('keeps the first answer when timestamps tie and keeps Admin answers separate', async () => {
       const app = await visit();
       for (const [kind,letter] of [['question_answered','A'],['question_answered','B'],['admin_test_question_answered','C']]) {
         app.run(`recordEvent(${JSON.stringify(kind)}, 'Test', {
@@ -54,11 +55,11 @@ for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
           choiceLetter:${JSON.stringify(letter)}, choiceText:${JSON.stringify('answer ' + letter)}
         })`);
       }
-      assert.equal(app.run('learningActivityAnswerValue(state.linkedActivity)'), 'B: answer B');
+      assert.equal(app.run('learningActivityAnswerValue(state.linkedActivity)'), 'A: answer A');
       assert.equal(app.run('learningActivityAnswerValue(state.linkedActivity, {adminTest:true})'), 'C: answer C');
       await app.run('recordParticipantCompletionAndLaunchForm(state.linkedActivity)');
       const launched = new URL(app.observations.href);
-      assert.equal(launched.searchParams.get('answer'), 'B: answer B');
+      assert.equal(launched.searchParams.get('answer'), 'A: answer A');
       assert.equal(launched.searchParams.get('study_group'), groupCode);
       app.run("renderParticipantCompletionLink(state.linkedActivity, firstEventForSchedule(state.linkedActivity.id, ['content_completed']))");
       const retry = new URL(app.nodes.get('#participantCompletionFormLink').href);
@@ -81,16 +82,24 @@ for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
         latestUrl = app.observations.href;
         assert.equal(app.nodes.get('#participantCompletionFormLink').href, latestUrl);
         const fields = new URL(latestUrl).searchParams;
-        assert.equal(fields.get('answer'), `${'ABC'[index]}: ${content.choices[index]}`);
+        assert.equal(fields.get('answer'), `A: ${content.choices[0]}`);
         assert.equal(fields.get('completion_date'), index < 2 ? '2026-10-10' : '2026-10-11');
         assert.equal(fields.get('study_group'), groupCode);
-        assert.equal(fields.get('activity_number'), '20/26');
+        assert.equal(fields.get('activity_number'), '10/13');
       }
       app.run(`recordEvent('question_answered','Not handed off', {
         scheduleId:state.linkedActivity.id, choiceLetter:'D', choiceText:'Unsent answer'
       })`);
       await app.run('refreshAll()');
       assert.equal(app.nodes.get('#participantCompletionFormLink').href, latestUrl);
+    });
+
+    it('retains the first selection when the device clock moves backward', async () => {
+      const app = await visit();
+      app.run("recordEvent('question_answered','First',{scheduleId:state.linkedActivity.id,choiceLetter:'B',choiceText:'First choice'})");
+      app.clock.now = '2026-10-09T15:00:00Z';
+      app.run("recordEvent('question_answered','Later',{scheduleId:state.linkedActivity.id,choiceLetter:'A',choiceText:'Later choice'})");
+      assert.equal(app.run('learningActivityAnswerValue(state.linkedActivity)'), 'B: First choice');
     });
 
     it('encodes punctuation and uses a Central calendar date without Microsoft date quotes', async () => {
@@ -119,7 +128,7 @@ for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
       const fresh = await visit();
       const url = new URL(fresh.run('buildCompletionFormUrl(new Date().toISOString(),state.linkedActivity)'));
       assert.equal(url.searchParams.get('answer'),'');
-      assert.equal(url.searchParams.get('activity_number'),'20/26');
+      assert.equal(url.searchParams.get('activity_number'),'10/13');
       fresh.run('state.calendarOpenScheduleIds.clear()');
       assert.equal(new URL(fresh.run('buildCompletionFormUrl(new Date().toISOString(),state.linkedActivity)')).searchParams.get('calendar_link'),'No');
     });
@@ -130,18 +139,21 @@ for (const [variant, groupCode] of [['intervention', 'A'], ['control', 'B']]) {
       app.run('refreshPlanForCalendarExport()');
       const calendar = app.run('makeCalendarICS()').replace(/\r\n /g, '');
       const events = calendar.split('BEGIN:VEVENT\r\n').slice(1);
-      assert.equal(events.length,28);
-      const followUps = events.filter(event => event.includes('SUMMARY:6-Month Follow-Up'));
+      assert.equal(events.length,15);
+      const followUps = events.filter(event => event.includes('SUMMARY:3-Month Follow-Up'));
       assert.equal(followUps.length,2);
       for (const event of followUps) {
         const url = new URL(event.match(/URL;VALUE=URI:([^\r\n]+)/)[1]);
         assert.equal(url.href,'https://vcom.qualtrics.com/jfe/form/SV_01EQl66mgcZtwbk');
         assert.equal(url.search,'');
         assert.match(event,/TRIGGER:-PT0M/);
+        assert.equal((event.match(/BEGIN:VALARM/g) || []).length, 1);
       }
-      assert.match(followUps[0],/DTSTART;TZID=America\/Chicago:20261120T100000/);
-      assert.match(followUps[1],/DTSTART;TZID=America\/Chicago:20261127T103000/);
-      assert.equal(events.filter(event => /URL;VALUE=URI:https:\/\/example\.test/.test(event)).length,26);
+      assert.match(followUps[0],/DTSTART;TZID=America\/Chicago:20261030T100000/);
+      assert.match(followUps[1],/DTSTART;TZID=America\/Chicago:20261106T103000/);
+      assert.match(followUps[0],/DTEND;TZID=America\/Chicago:20261030T101500/);
+      assert.match(followUps[1],/DTEND;TZID=America\/Chicago:20261106T113000/);
+      assert.equal(events.filter(event => /URL;VALUE=URI:https:\/\/example\.test/.test(event)).length,13);
       assert.equal(calendar.includes('forms.office.com'),false);
       const activityForm = new URL(app.run('buildCompletionFormUrl(new Date().toISOString(),state.linkedActivity)'));
       assert.equal(activityForm.origin + activityForm.pathname,destination);

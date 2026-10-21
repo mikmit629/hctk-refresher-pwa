@@ -20,31 +20,13 @@ window.HCTK_VARIANT_CONFIG = {
   }
 };
 
-window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-4c413529b661';
+window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-341d284eec99';
 
 window.HCTK_CONTENT_BANK = [
   {
     id: 'control-content-001',
-    activityId: '1/26',
+    activityId: '1/13',
     sequence: 1,
-    format: 'Fact',
-    title: 'A week has seven days.',
-    prompt: 'Many calendars organize time into seven-day weeks, with each day appearing in the same repeating order.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-002',
-    activityId: '2/26',
-    sequence: 2,
     format: 'Question',
     title: 'Which item is commonly used to write on a whiteboard?',
     prompt: '',
@@ -59,32 +41,14 @@ window.HCTK_CONTENT_BANK = [
       'Key'
     ],
     correctIndex: 1,
-    rationale: 'A: A spoon is used for eating or serving food.\nB: A marker is commonly used to write on a whiteboard.\nC: A pillow is used for rest or support.\nD: A key is used to open a lock.',
+    rationale: 'Correct answer: B. A marker is commonly used to write on a whiteboard.\nA: A spoon is used for eating or serving food.\nB: Correct. A marker is commonly used to write on a whiteboard.\nC: A pillow is used for rest or support.\nD: A key is used to open a lock.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-003',
-    activityId: '3/26',
-    sequence: 3,
-    format: 'Fact',
-    title: 'A triangle has three sides.',
-    prompt: 'Triangles can look different from one another, but each triangle is defined by having three sides and three angles.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-004',
-    activityId: '4/26',
-    sequence: 4,
+    id: 'control-content-002',
+    activityId: '2/13',
+    sequence: 2,
     format: 'Question',
     title: 'How many corners does a rectangle have?',
     prompt: '',
@@ -99,32 +63,14 @@ window.HCTK_CONTENT_BANK = [
       'Five'
     ],
     correctIndex: 2,
-    rationale: 'A: Two corners would not make a rectangle.\nB: Three corners describes a triangle.\nC: A rectangle has four corners.\nD: Five corners describes a pentagon-like shape, not a rectangle.',
+    rationale: 'Correct answer: C. A rectangle has four corners.\nA: Two corners would not make a rectangle.\nB: Three corners describes a triangle.\nC: Correct. A rectangle has four corners.\nD: Five corners describes a pentagon-like shape, not a rectangle.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-005',
-    activityId: '5/26',
-    sequence: 5,
-    format: 'Fact',
-    title: 'The Moon reflects sunlight.',
-    prompt: 'The Moon does not make its own visible light. It appears bright because sunlight reflects from its surface.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-006',
-    activityId: '6/26',
-    sequence: 6,
+    id: 'control-content-003',
+    activityId: '3/13',
+    sequence: 3,
     format: 'Question',
     title: 'Which object is commonly used to tell direction?',
     prompt: '',
@@ -139,32 +85,14 @@ window.HCTK_CONTENT_BANK = [
       'Paintbrush'
     ],
     correctIndex: 0,
-    rationale: 'A: A compass is commonly used to identify direction.\nB: A teacup is used for drinking.\nC: A stapler is used to fasten papers.\nD: A paintbrush is used to apply paint.',
+    rationale: 'Correct answer: A. A compass is commonly used to identify direction.\nA: Correct. A compass is commonly used to identify direction.\nB: A teacup is used for drinking.\nC: A stapler is used to fasten papers.\nD: A paintbrush is used to apply paint.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-007',
-    activityId: '7/26',
-    sequence: 7,
-    format: 'Fact',
-    title: 'Alphabetical order follows letter sequence.',
-    prompt: 'Alphabetizing arranges words by comparing their letters from left to right.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-008',
-    activityId: '8/26',
-    sequence: 8,
+    id: 'control-content-004',
+    activityId: '4/13',
+    sequence: 4,
     format: 'Question',
     title: 'Which word would usually come first alphabetically?',
     prompt: '',
@@ -179,32 +107,14 @@ window.HCTK_CONTENT_BANK = [
       'Dog'
     ],
     correctIndex: 0,
-    rationale: 'A: Apple begins with A.\nB: Banana begins with B, which follows A.\nC: Carrot begins with C, which follows A and B.\nD: Dog begins with D, which follows A, B, and C.',
+    rationale: 'Correct answer: A. Apple comes before Banana, Carrot, and Dog alphabetically.\nA: Correct. Apple begins with A.\nB: Banana begins with B, which follows A.\nC: Carrot begins with C, which follows A and B.\nD: Dog begins with D, which follows A, B, and C.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-009',
-    activityId: '9/26',
-    sequence: 9,
-    format: 'Fact',
-    title: 'Recipes usually list ingredients and steps.',
-    prompt: 'A recipe commonly separates what is needed from what should be done, making the instructions easier to follow.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-010',
-    activityId: '10/26',
-    sequence: 10,
+    id: 'control-content-005',
+    activityId: '5/13',
+    sequence: 5,
     format: 'Question',
     title: 'Which tool is commonly used to measure liquid volume in a kitchen?',
     prompt: '',
@@ -219,32 +129,14 @@ window.HCTK_CONTENT_BANK = [
       'Comb'
     ],
     correctIndex: 1,
-    rationale: 'A: A hammer is used for tasks such as driving nails.\nB: A measuring cup is commonly used to measure liquid volume.\nC: An envelope is used to hold papers or mail.\nD: A comb is used for hair.',
+    rationale: 'Correct answer: B. A measuring cup is commonly used to measure liquid volume.\nA: A hammer is used for tasks such as driving nails.\nB: Correct. A measuring cup is commonly used to measure liquid volume.\nC: An envelope is used to hold papers or mail.\nD: A comb is used for hair.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-011',
-    activityId: '11/26',
-    sequence: 11,
-    format: 'Fact',
-    title: 'Libraries organize materials so they can be found again.',
-    prompt: 'Books and other items are often grouped by topic, author, or catalog number to make searching easier.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-012',
-    activityId: '12/26',
-    sequence: 12,
+    id: 'control-content-006',
+    activityId: '6/13',
+    sequence: 6,
     format: 'Question',
     title: 'What is a bookmark used for?',
     prompt: '',
@@ -259,32 +151,14 @@ window.HCTK_CONTENT_BANK = [
       'Sharpening a pencil'
     ],
     correctIndex: 2,
-    rationale: 'A: A bookmark is not used to stir soup.\nB: A bookmark is not designed to hold a door open.\nC: A bookmark marks a place in a book or document.\nD: A bookmark is not used to sharpen pencils.',
+    rationale: 'Correct answer: C. A bookmark marks a place in a book or document.\nA: A bookmark is not used to stir soup.\nB: A bookmark is not designed to hold a door open.\nC: Correct. A bookmark marks a place in a book or document.\nD: A bookmark is not used to sharpen pencils.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-013',
-    activityId: '13/26',
-    sequence: 13,
-    format: 'Fact',
-    title: 'Many plants need light, water, and suitable conditions.',
-    prompt: 'Plant growth depends on the type of plant and its environment, including light, water, temperature, and soil conditions.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-014',
-    activityId: '14/26',
-    sequence: 14,
+    id: 'control-content-007',
+    activityId: '7/13',
+    sequence: 7,
     format: 'Question',
     title: 'What may help a houseplant when its soil is dry?',
     prompt: '',
@@ -299,32 +173,14 @@ window.HCTK_CONTENT_BANK = [
       'Water it appropriately'
     ],
     correctIndex: 3,
-    rationale: 'A: Covering it with a book does not address dry soil.\nB: Removing light does not add water to dry soil.\nC: Removing all leaves would usually harm the plant.\nD: Watering appropriately may help when soil is dry.',
+    rationale: 'Correct answer: D. Watering appropriately may help when soil is dry.\nA: Covering it with a book does not address dry soil.\nB: Removing light does not add water to dry soil.\nC: Removing all leaves would usually harm the plant.\nD: Correct. Watering appropriately may help when soil is dry.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-015',
-    activityId: '15/26',
-    sequence: 15,
-    format: 'Fact',
-    title: 'A map legend explains symbols.',
-    prompt: 'A legend, sometimes called a key, helps readers understand what colors, lines, and icons mean on a map.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-016',
-    activityId: '16/26',
-    sequence: 16,
+    id: 'control-content-008',
+    activityId: '8/13',
+    sequence: 8,
     format: 'Question',
     title: 'What part of a map tells you what symbols mean?',
     prompt: '',
@@ -339,32 +195,14 @@ window.HCTK_CONTENT_BANK = [
       'Compass needle only'
     ],
     correctIndex: 2,
-    rationale: 'A: A scale bar helps estimate distance, not symbol meaning.\nB: A page number identifies a page.\nC: A legend or key explains map symbols.\nD: A compass needle shows direction, not symbol meaning.',
+    rationale: 'Correct answer: C. A legend or key explains map symbols.\nA: A scale bar helps estimate distance, not symbol meaning.\nB: A page number identifies a page.\nC: Correct. A legend or key explains map symbols.\nD: A compass needle shows direction, not symbol meaning.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-017',
-    activityId: '17/26',
-    sequence: 17,
-    format: 'Fact',
-    title: 'Tempo describes musical speed.',
-    prompt: 'Tempo refers to how fast or slow music is performed.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-018',
-    activityId: '18/26',
-    sequence: 18,
+    id: 'control-content-009',
+    activityId: '9/13',
+    sequence: 9,
     format: 'Question',
     title: 'Which item is a musical instrument?',
     prompt: '',
@@ -379,32 +217,14 @@ window.HCTK_CONTENT_BANK = [
       'Flashlight'
     ],
     correctIndex: 0,
-    rationale: 'A: A violin is a musical instrument.\nB: A backpack is used to carry items.\nC: A curtain covers a window or opening.\nD: A flashlight provides portable light.',
+    rationale: 'Correct answer: A. A violin is a musical instrument.\nA: Correct. A violin is a musical instrument.\nB: A backpack is used to carry items.\nC: A curtain covers a window or opening.\nD: A flashlight provides portable light.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-019',
-    activityId: '19/26',
-    sequence: 19,
-    format: 'Fact',
-    title: 'Recycling labels help sort materials.',
-    prompt: 'Labels and local rules can help people decide whether an item belongs in trash, recycling, or another collection stream.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-020',
-    activityId: '20/26',
-    sequence: 20,
+    id: 'control-content-010',
+    activityId: '10/13',
+    sequence: 10,
     format: 'Question',
     title: 'Which item is commonly made of paper?',
     prompt: '',
@@ -419,32 +239,14 @@ window.HCTK_CONTENT_BANK = [
       'Metal spoon'
     ],
     correctIndex: 1,
-    rationale: 'A: A screwdriver is usually made with metal and a handle material.\nB: A notebook is commonly made with paper pages.\nC: A glass jar is made of glass.\nD: A metal spoon is made of metal.',
+    rationale: 'Correct answer: B. A notebook is commonly made with paper pages.\nA: A screwdriver is usually made with metal and a handle material.\nB: Correct. A notebook is commonly made with paper pages.\nC: A glass jar is made of glass.\nD: A metal spoon is made of metal.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-021',
-    activityId: '21/26',
-    sequence: 21,
-    format: 'Fact',
-    title: 'Unique passwords are harder to guess.',
-    prompt: 'Using a different password for each account can reduce the chance that one exposed password affects many accounts.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-022',
-    activityId: '22/26',
-    sequence: 22,
+    id: 'control-content-011',
+    activityId: '11/13',
+    sequence: 11,
     format: 'Question',
     title: 'Which password habit is generally safer?',
     prompt: '',
@@ -459,32 +261,14 @@ window.HCTK_CONTENT_BANK = [
       'Write passwords on public signs'
     ],
     correctIndex: 2,
-    rationale: 'A: Reusing one short password can increase risk.\nB: Sharing passwords by text message can expose them.\nC: Unique passwords reduce repeated use across accounts.\nD: Posting passwords publicly is unsafe.',
+    rationale: 'Correct answer: C. Unique passwords reduce repeated use across accounts.\nA: Reusing one short password can increase risk.\nB: Sharing passwords by text message can expose them.\nC: Correct. Unique passwords reduce repeated use across accounts.\nD: Posting passwords publicly is unsafe.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-023',
-    activityId: '23/26',
-    sequence: 23,
-    format: 'Fact',
-    title: 'Weather forecasts estimate future conditions.',
-    prompt: 'Forecasts use observations and models to estimate conditions such as temperature, rain, wind, and cloud cover.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-024',
-    activityId: '24/26',
-    sequence: 24,
+    id: 'control-content-012',
+    activityId: '12/13',
+    sequence: 12,
     format: 'Question',
     title: 'Which tool is commonly used to check temperature?',
     prompt: '',
@@ -499,32 +283,14 @@ window.HCTK_CONTENT_BANK = [
       'Thermometer'
     ],
     correctIndex: 3,
-    rationale: 'A: A ruler measures length.\nB: A whisk is used for mixing.\nC: A notebook is used for writing.\nD: A thermometer is commonly used to check temperature.',
+    rationale: 'Correct answer: D. A thermometer is commonly used to check temperature.\nA: A ruler measures length.\nB: A whisk is used for mixing.\nC: A notebook is used for writing.\nD: Correct. A thermometer is commonly used to check temperature.',
     citationNumbers: '',
     citationReferences: ''
   },
   {
-    id: 'control-content-025',
-    activityId: '25/26',
-    sequence: 25,
-    format: 'Fact',
-    title: 'A table of contents points readers to sections.',
-    prompt: 'A table of contents lists headings or chapters with page numbers so readers can find material more quickly.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '',
-    citationReferences: ''
-  },
-  {
-    id: 'control-content-026',
-    activityId: '26/26',
-    sequence: 26,
+    id: 'control-content-013',
+    activityId: '13/13',
+    sequence: 13,
     format: 'Question',
     title: 'Where would you look to find where a chapter begins?',
     prompt: '',
@@ -539,7 +305,7 @@ window.HCTK_CONTENT_BANK = [
       'Window latch'
     ],
     correctIndex: 0,
-    rationale: 'A: A table of contents lists where chapters or sections begin.\nB: A shoe size tag gives footwear size information.\nC: A kitchen timer tracks time.\nD: A window latch helps secure a window.',
+    rationale: 'Correct answer: A. A table of contents lists where chapters or sections begin.\nA: Correct. A table of contents lists where chapters or sections begin.\nB: A shoe size tag gives footwear size information.\nC: A kitchen timer tracks time.\nD: A window latch helps secure a window.',
     citationNumbers: '',
     citationReferences: ''
   }

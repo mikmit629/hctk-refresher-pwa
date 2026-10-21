@@ -6,8 +6,8 @@ const { randomUUID } = require('node:crypto');
 const appRoot = path.resolve(__dirname, '..');
 const profile = {
   studyId: 'LOCAL-A',
-  enrollmentDate: '2026-05-27',
-  followUpDate: '2026-11-27',
+  enrollmentDate: '2026-08-05',
+  followUpDate: '2026-11-06',
   followUpTime: '10:30'
 };
 const testTiming = {
@@ -18,7 +18,8 @@ const testTiming = {
 
 function activityQuery(overrides = {}) {
   return '?' + new URLSearchParams({
-    activity: '20',
+    activity: '10',
+    curriculum: 'questions-13-v1',
     study_id: profile.studyId,
     enrollment_date: profile.enrollmentDate,
     follow_up_date: profile.followUpDate,

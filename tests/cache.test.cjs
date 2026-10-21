@@ -76,12 +76,16 @@ for (const variant of variants) {
     assert(precached.includes(corePath));
     const html = fs.readFileSync(path.join(appRoot, folder, 'index.html'), 'utf8');
     assert(html.includes(`src="app.js?v=${version}"`));
+    assert(html.includes(`href="styles.css?v=${version}"`));
+    assert(html.includes(`href="manifest.webmanifest?v=${version}"`));
+    assert(precached.includes(`./styles.css?v=${version}`));
+    assert(precached.includes(`./manifest.webmanifest?v=${version}`));
     assert(html.includes(`src="${corePath.replace(/^\.\//, '')}"`));
     await lifecycle('activate');
     assert.deepEqual(deleted, [oldOwnCache]);
 
     entries.set('./index.html', 'PUBLIC SHELL');
-    assert.equal((await request(base + '?activity=20&study_id=LOCAL-A', 'navigate')).result, 'PUBLIC SHELL');
+    assert.equal((await request(base + '?activity=10&study_id=LOCAL-A', 'navigate')).result, 'PUBLIC SHELL');
     entries.set(root + `shared/app-core.js?v=${version}`, 'CURRENT CORE');
     assert.equal((await request(root + `shared/app-core.js?v=${version}`)).result, 'CURRENT CORE');
 
@@ -99,7 +103,7 @@ for (const variant of variants) {
     assert.equal(puts.length, 0);
 
     online = true;
-    await request(base + '?activity=20&study_id=LOCAL-A', 'navigate');
+    await request(base + '?activity=10&study_id=LOCAL-A', 'navigate');
     assert.deepEqual(puts, [['./index.html', 'PUBLIC RESPONSE']]);
     assert(opened.every((key) => key === cacheName));
   });
@@ -145,7 +149,7 @@ for (const variant of variants) {
     function navigate() {
       let pending;
       handlers.fetch({
-        request: { method: 'GET', mode: 'navigate', url: base + '?activity=20&study_id=LOCAL-CACHE' },
+        request: { method: 'GET', mode: 'navigate', url: base + '?activity=10&study_id=LOCAL-CACHE' },
         respondWith(promise) { pending = promise; }
       });
       assert(pending);

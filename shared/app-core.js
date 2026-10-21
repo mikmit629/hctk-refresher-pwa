@@ -11,25 +11,26 @@ const HCTK_LABELS = {
   contentCompletedDetail: 'Participant marked the scheduled refresher complete.',
   adminPreviewDetail: 'Admin opened a scheduled learning card preview.',
   calendarName: 'TKHC',
-  followUpConfirmationSummary: '6-Month Follow-Up Date Confirmation',
-  followUpVisitSummary: '6-Month Follow-Up Visit',
+  followUpConfirmationSummary: '3-Month Follow-Up Date Confirmation',
+  followUpVisitSummary: '3-Month Follow-Up Visit',
   icsFilename: 'TKHC.ics',
   testIcsFilename: 'TKHC.ics',
   ...(HCTK_CONFIG.labels || {})
 };
 
-const STUDY_DURATION_DAYS = 183;
 const REMINDER_HOUR = 10;
 const REMINDER_MINUTE = 0;
 const REMINDER_DURATION_MINUTES = 15;
+const CONFIRMATION_REMINDER_DURATION_MINUTES = 15;
 const FOLLOW_UP_VISIT_DURATION_MINUTES = 60;
 const CENTRAL_TIME_ZONE = 'America/Chicago';
-const SCHEDULE_POLICY_VERSION = 'weekly-saturday-v1';
-const TEST_SCHEDULE_POLICY_VERSION = 'admin-minute-test-v1';
+const SCHEDULE_POLICY_VERSION = 'weekly-saturday-13-v2';
+const TEST_SCHEDULE_POLICY_VERSION = 'admin-minute-test-13-v2';
 const SCHEDULE_MODE_PRODUCTION = 'production';
 const SCHEDULE_MODE_TEST = 'test';
 const TEST_INTERVAL_OPTIONS = [3, 5, 10, 15];
-const ACTIVITY_COUNT = 26;
+const ACTIVITY_COUNT = 13;
+const CURRICULUM_VERSION = 'questions-13-v1';
 const CONTENT_BANK_VERSION = window.HCTK_CONTENT_BANK_VERSION || 'local-content';
 const SCHEDULE_ID_PREFIX = HCTK_CONFIG.scheduleIdPrefix || 'hctk';
 const COMPLETION_FORM_URL = 'https://vcom.qualtrics.com/jfe/form/SV_4Orwv8tDt1AWIsu';
@@ -144,9 +145,12 @@ function initializeVisit() {
   const params = new URLSearchParams(window.location.search);
   if (params.has('activity') || params.has('schedule')) {
     try {
+      if (params.get('curriculum') !== CURRICULUM_VERSION) {
+        throw new Error('This calendar is from an earlier study version. Ask the study team for an updated calendar before continuing.');
+      }
       const sequence = parseActivitySequence(params.get('activity'));
       if (!sequence || !CONTENT_BANK.some((content) => content.sequence === sequence)) {
-        throw new Error('This link must identify an activity from 1 to 26. Open the latest calendar event or return to Participant Setup.');
+        throw new Error('This link must identify an activity from 1 to 13. Open the latest calendar event or return to Participant Setup.');
       }
       const profile = calendarLinkProfile(params);
       if (!profile?.studyId?.trim() || !isCalendarDate(profile.enrollmentDate) ||
@@ -171,7 +175,8 @@ function initializeVisit() {
       state.scheduleSettings = settings;
       state.linkedActivity = item;
       state.participantUnlocked = true;
-    } catch {
+    } catch (error) {
+      elements.participantUnlockStatus.textContent = error.message;
       window.history.replaceState(null, '', new URL('./', window.location.href).href);
     }
   }
@@ -1060,7 +1065,7 @@ function renderAdminReviewPicker() {
     const content = contentById(item.contentId);
     const option = document.createElement('option');
     option.value = item.id;
-    option.textContent = `Reminder ${item.sequenceNumber}/26 · ${formatScheduleShortLabel(item)} · ${content?.title || HCTK_LABELS.contentFallback}`;
+    option.textContent = `Reminder ${item.sequenceNumber}/${ACTIVITY_COUNT} · ${formatScheduleShortLabel(item)} · ${content?.title || HCTK_LABELS.contentFallback}`;
     option.selected = item.id === state.selectedScheduleId;
     elements.adminReviewSelect.appendChild(option);
   });
@@ -1206,7 +1211,7 @@ function addFollowUpCalendarEvents(lines) {
   const uidStudyId = String(state.profile.studyId || 'participant').replace(/[^a-z0-9-]/gi, '') || 'participant';
   const confirmationDate = addDaysToISODate(state.profile.followUpDate, -7);
   const confirmationStart = compactLocalDateTime(confirmationDate, REMINDER_HOUR, REMINDER_MINUTE);
-  const confirmationEnd = addMinutesToLocalDate(confirmationDate, REMINDER_HOUR, REMINDER_MINUTE, REMINDER_DURATION_MINUTES);
+  const confirmationEnd = addMinutesToLocalDate(confirmationDate, REMINDER_HOUR, REMINDER_MINUTE, CONFIRMATION_REMINDER_DURATION_MINUTES);
   const confirmationDescription = [
     `Study ID: ${state.profile.studyId || ''}`,
     `Follow-up Visit: ${formatFollowUpDateTime()}`
@@ -1339,7 +1344,8 @@ function recordEvent(kind, detail, extra) {
     kind,
     detail,
     studyId: state.profile?.studyId || '',
-    ...extra
+    ...extra,
+    recordedOrder: state.events.length
   };
   if (!event.activityNumber && event.contentId) {
     const content = contentById(event.contentId);
@@ -1463,6 +1469,7 @@ function labelForEvent(kind) {
 function reminderLink(item) {
   const url = new URL(defaultAppUrl());
   url.searchParams.set('activity', String(item.sequenceNumber));
+  url.searchParams.set('curriculum', CURRICULUM_VERSION);
   url.searchParams.set('study_id', state.profile.studyId || '');
   url.searchParams.set('enrollment_date', state.profile.enrollmentDate || '');
   url.searchParams.set('follow_up_date', state.profile.followUpDate || '');
@@ -1476,7 +1483,7 @@ function reminderLink(item) {
 }
 
 function parseActivitySequence(value) {
-  const match = String(value || '').trim().match(/^0*([1-9]|1\d|2[0-6])(?:\/26)?$/);
+  const match = String(value || '').trim().match(/^0*([1-9]|1[0-3])(?:\/13)?$/);
   return match ? Number(match[1]) : 0;
 }
 
@@ -1544,7 +1551,10 @@ function learningActivityAnswerValue(item, options = {}) {
   if (!choices.length) return '';
 
   const answerKinds = options.adminTest ? ['admin_test_question_answered'] : ['question_answered'];
-  const answerEvent = latestEventForSchedule(item.id, answerKinds);
+  // Keep the first selection in this visit, even after feedback or a clock change.
+  const answerEvent = state.events
+    .filter((event) => event.scheduleId === item.id && answerKinds.includes(event.kind))
+    .sort((left, right) => left.recordedOrder - right.recordedOrder)[0];
   const index = Number(answerEvent?.choiceIndex || 0) - 1;
   const choice = answerEvent?.choiceText || choices[index] || '';
   const letter = answerEvent?.choiceLetter || choiceLetter(index);
@@ -1655,7 +1665,6 @@ function defaultProfile() {
     enrollmentDate: todayChicagoISODate(),
     followUpDate: '',
     followUpTime: '',
-    durationDays: STUDY_DURATION_DAYS
   };
 }
 
@@ -1666,12 +1675,12 @@ function sanitizeProfile(profile) {
     enrollmentDate: isISODate(profile?.enrollmentDate) ? profile.enrollmentDate : fallback.enrollmentDate,
     followUpDate: isISODate(profile?.followUpDate) ? profile.followUpDate : fallback.followUpDate,
     followUpTime: isLocalTime(profile?.followUpTime) ? profile.followUpTime : fallback.followUpTime,
-    durationDays: STUDY_DURATION_DAYS
   };
 }
 
 function profileReadyForParticipantUnlock(profile) {
-  return Boolean(profile?.studyId && profile?.followUpDate && profile?.followUpTime);
+  return Boolean(profile?.studyId?.trim() && isCalendarDate(profile?.enrollmentDate) &&
+    isCalendarDate(profile?.followUpDate) && isLocalTime(profile?.followUpTime));
 }
 
 function defaultAppUrl() {

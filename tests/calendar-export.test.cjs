@@ -22,16 +22,21 @@ for (const variant of ['intervention', 'control']) {
         const app = await boot({ variant, search: activityQuery({ ...profileOverrides, ...(mode === 'test' ? testTiming : {}) }), forbidPlan: false });
         app.run('refreshPlanForCalendarExport()');
         const events = calendarEvents(app.run('makeCalendarICS()'));
-        assert.equal(events.length, 28);
+        assert.equal(events.length, 15);
         const ids = new Set();
         for (let i = 0; i < events.length; i++) {
           const { fields, notes } = events[i];
           const link = notes.match(/^https:\/\/\S+$/m)?.[0];
           assert.equal(link, fields['URL;VALUE=URI']);
-          assert.ok(notes.startsWith(i < 26 ? 'Open activity:\n' : 'Open follow-up form:\n'));
+          assert.ok(notes.startsWith(i < 13 ? 'Open activity:\n' : 'Open follow-up form:\n'));
           assert.ok(notes.split('\n').slice(3).join('\n').length > 0);
           ids.add(fields.UID);
-          if (i < 26) {
+          assert.equal((events[i].event.match(/BEGIN:VALARM/g) || []).length, 1);
+          if (i < 13) {
+            const content = app.json(`CONTENT_BANK[${i}]`);
+            const summary = fields.SUMMARY.replace(/\\([\\;,nN])/g, (_, char) => /[nN]/.test(char) ? '\n' : char);
+            assert.ok(summary.includes(content.title.replace(/\s+/g, ' ').trim()));
+            for (const choice of content.choices) assert.ok(notes.includes(choice));
             if (mode === 'production') {
               assert.match(fields['DTSTART;TZID=America/Chicago'], /^\d{8}T100000$/);
               assert.match(fields['DTEND;TZID=America/Chicago'], /^\d{8}T101500$/);
@@ -50,7 +55,7 @@ for (const variant of ['intervention', 'control']) {
             assert.equal(new URL(link).search, '');
           }
         }
-        assert.equal(ids.size, 28);
+        assert.equal(ids.size, 15);
       });
     }
 
@@ -61,7 +66,7 @@ for (const variant of ['intervention', 'control']) {
       assert.equal(app.observations.download.filename, 'TKHC.ics');
       assert.equal(app.observations.download.type, 'text/calendar');
       const events = calendarEvents(app.observations.download.text);
-      assert.equal(events.length, 28);
+      assert.equal(events.length, 15);
       assert.ok(events[0].notes.startsWith('Open activity:\nhttps://'));
       assert.match(app.nodes.get('#exportStatus').textContent, /calendar.*downloaded/i);
     });

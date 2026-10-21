@@ -15,11 +15,11 @@ from openpyxl import load_workbook
 SCRIPT_DIR = Path(__file__).resolve().parent
 APP_DIR = SCRIPT_DIR.parent
 CODING_DIR = APP_DIR.parent
-DEFAULT_WORKBOOK = CODING_DIR / "hctk_refresher_activities_26_draft.xlsx"
+DEFAULT_WORKBOOK = APP_DIR / "activity_spreadsheets" / "activities-13-question.xlsx"
 DEFAULT_INTERVENTION_APP = APP_DIR / "app.js"
 DEFAULT_CONTROL_APP = APP_DIR / "2" / "app.js"
-ACTIVITY_COUNT = 26
-SHEET_NAME = "Refresher Activities"
+ACTIVITY_COUNT = 13
+SHEET_NAME = "Intervention Activites"
 CHOICE_KEYS = ["choice_a", "choice_b", "choice_c", "choice_d"]
 TARGETS = {
     "intervention": {
@@ -64,6 +64,8 @@ def main() -> None:
     if not workbook_path.exists():
         raise SystemExit(f"Workbook not found: {workbook_path}")
 
+    global SHEET_NAME
+    SHEET_NAME = "Control Activites" if args.target == "control" else "Intervention Activites"
     workbook = load_workbook(workbook_path, data_only=False)
     target = TARGETS[args.target]
     rows = read_refresher_sheet(workbook, target["id_prefix"])
@@ -121,8 +123,10 @@ def read_refresher_sheet(workbook: Any, id_prefix: str) -> list[dict[str, Any]]:
         correct_choice = cell_text(sheet, headers, row_number, "correct_choice")
         rationale = cell_text(sheet, headers, row_number, "rationale / card feedback")
         correct_index = validate_card_fields(content_format, choices, correct_choice, rationale, row_number)
-        if content_format == "Question":
-            rationale = clean_rationale(rationale)
+        if not cell_text(sheet, headers, row_number, "title / calendar summary"):
+            raise SystemExit(f"{SHEET_NAME} row {row_number}: missing question")
+        if [line[0] for line in rationale.splitlines() if re.match(r"^[A-D]: ", line)] != list("ABCD"):
+            raise SystemExit(f"{SHEET_NAME} row {row_number}: feedback must include A through D in order")
         media_path = cell_text(sheet, headers, row_number, "media / card asset")
         media_type = infer_media_type(media_path) if media_path else ""
         rows.append({
@@ -149,7 +153,7 @@ def read_refresher_sheet(workbook: Any, id_prefix: str) -> list[dict[str, Any]]:
     if len({row["id"] for row in rows}) != ACTIVITY_COUNT:
         raise SystemExit("Generated content ids must be unique")
     if [row["sequence"] for row in rows] != list(range(1, ACTIVITY_COUNT + 1)):
-        raise SystemExit(f"{SHEET_NAME} must contain activity ids 1/26 through 26/26")
+        raise SystemExit(f"{SHEET_NAME} must contain activity ids 1/13 through 13/13")
     return rows
 
 
@@ -176,18 +180,18 @@ def row_is_empty(sheet: Any, row_number: int, max_column: int) -> bool:
 
 
 def parse_activity_sequence(value: str, row_number: int) -> int:
-    match = re.fullmatch(r"(\d+)\s*/\s*26", value)
+    match = re.fullmatch(r"(\d+)\s*/\s*13", value)
     if not match:
-        raise SystemExit(f"{SHEET_NAME} row {row_number}: activity_id / calendar sequence must use N/26")
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: activity_id / calendar sequence must use N/13")
     sequence = int(match.group(1))
     if sequence < 1 or sequence > ACTIVITY_COUNT:
-        raise SystemExit(f"{SHEET_NAME} row {row_number}: activity sequence is outside 1/26 through 26/26")
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: activity sequence is outside 1/13 through 13/13")
     return sequence
 
 
 def validate_format(value: str, row_number: int) -> None:
-    if value not in {"Fact", "Question"}:
-        raise SystemExit(f"{SHEET_NAME} row {row_number}: format / card type must be Fact or Question")
+    if value != "Question":
+        raise SystemExit(f"{SHEET_NAME} row {row_number}: format / card type must be Question")
 
 
 def validate_card_fields(

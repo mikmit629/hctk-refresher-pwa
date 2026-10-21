@@ -1,6 +1,6 @@
 {
-  "name": "HCTK Refresher",
-  "short_name": "HCTK Refresher",
+  "name": "HCTK Study Activities",
+  "short_name": "HCTK Study",
   "description": "HCTK",
   "id": "./",
   "start_url": "./index.html",

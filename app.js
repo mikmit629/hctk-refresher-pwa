@@ -4,47 +4,29 @@ window.HCTK_VARIANT_CONFIG = {
   "uidDomain": "hctk-serverless-pwa",
   "prodId": "-//HCTK//Intervention PWA//EN",
   "labels": {
-    "todayTitle": "Learning Card",
-    "noDueHeading": "No learning card due today",
+    "todayTitle": "Study Activity",
+    "noDueHeading": "No study activity due today",
     "noDueBody": "",
-    "blockedHeading": "No learning card due from this link",
-    "blockedBody": "This calendar link is outside its scheduled participant due window. Cards are available only during their scheduled due window.",
-    "contentFallback": "Learning card",
+    "blockedHeading": "No study activity due from this link",
+    "blockedBody": "This calendar link is outside its scheduled participant due window. Activities are available only during their scheduled due window.",
+    "contentFallback": "Study activity",
     "contentTypeFallback": "Placeholder content type",
-    "contentViewedDetail": "Participant viewed the current learning card.",
-    "contentCompletedDetail": "Participant marked the scheduled refresher complete.",
-    "adminPreviewDetail": "Admin opened a scheduled learning card preview.",
+    "contentViewedDetail": "Participant viewed the current study activity.",
+    "contentCompletedDetail": "Participant marked the scheduled study activity complete.",
+    "adminPreviewDetail": "Admin opened a scheduled study activity preview.",
     "calendarName": "TKHC",
     "icsFilename": "TKHC.ics",
     "testIcsFilename": "TKHC.ics"
   }
 };
 
-window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-16c604bd016c';
+window.HCTK_CONTENT_BANK_VERSION = 'spreadsheet-394dac339ea3';
 
 window.HCTK_CONTENT_BANK = [
   {
     id: 'content-001',
-    activityId: '1/26',
+    activityId: '1/13',
     sequence: 1,
-    format: 'Fact',
-    title: 'Severe bleeding can become life-threatening before professional help arrives.',
-    prompt: 'When bleeding is heavy, act immediately: make sure the scene can be approached safely, get emergency help moving, find the bleeding source, and start bleeding control.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '1, 2',
-    citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external'
-  },
-  {
-    id: 'content-002',
-    activityId: '2/26',
-    sequence: 2,
     format: 'Question',
     title: 'Which finding most strongly suggests life-threatening bleeding?',
     prompt: '',
@@ -59,32 +41,14 @@ window.HCTK_CONTENT_BANK = [
       'A bruise with no active bleeding'
     ],
     correctIndex: 2,
-    rationale: 'A: A small scrape is usually not life-threatening bleeding.\nB: Bleeding that stops quickly is less concerning than uncontrolled bleeding.\nC: Spurting, pooling, or soaked clothing suggests major ongoing blood loss.\nD: A bruise without active bleeding does not match the severe external bleeding scenario.',
-    citationNumbers: '2, 4',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
+    rationale: 'A: A small scrape is usually not life-threatening bleeding.\nB: Bleeding that stops quickly is less concerning than uncontrolled bleeding.\nC: Spurting, pooling, or soaked clothing suggests major ongoing blood loss. Severe bleeding can become life-threatening before professional help arrives.\nD: A bruise without active bleeding does not match the severe external bleeding scenario.',
+    citationNumbers: '1, 2, 4',
+    citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   },
   {
-    id: 'content-003',
-    activityId: '3/26',
-    sequence: 3,
-    format: 'Fact',
-    title: 'Check that the scene is safe before giving care.',
-    prompt: 'Before approaching, look for hazards such as traffic, weapons, fire, electricity, sharp objects, unstable structures, or other threats. If the scene is unsafe, call for help and do not enter.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '2, 4',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
-  },
-  {
-    id: 'content-004',
-    activityId: '4/26',
-    sequence: 4,
+    id: 'content-002',
+    activityId: '2/13',
+    sequence: 2,
     format: 'Question',
     title: 'What should you check before giving care for heavy bleeding?',
     prompt: '',
@@ -99,32 +63,14 @@ window.HCTK_CONTENT_BANK = [
       'Wait to see if the bleeding stops on its own'
     ],
     correctIndex: 0,
-    rationale: 'A: Check scene safety before hands-on care.\nB: Packing may be needed later, but safety comes first.\nC: A tourniquet should not be removed by a lay responder once applied.\nD: Heavy bleeding requires action once the scene is safe.',
+    rationale: 'A: Check scene safety before hands-on care. Before approaching, look for hazards such as traffic, weapons, fire, electricity, sharp objects, unstable structures, or other threats. If the scene is unsafe, call for help and do not enter.\nB: Packing may be needed later, but safety comes first.\nC: A tourniquet should not be removed by a lay responder once applied.\nD: Heavy bleeding requires action once the scene is safe.',
     citationNumbers: '2, 4',
     citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   },
   {
-    id: 'content-005',
-    activityId: '5/26',
-    sequence: 5,
-    format: 'Fact',
-    title: 'Emergency help should be activated as early as possible.',
-    prompt: 'Call 911/EMS right away. If other people are present, assign one specific person to call so the task is not lost in the crowd.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '2, 4',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
-  },
-  {
-    id: 'content-006',
-    activityId: '6/26',
-    sequence: 6,
+    id: 'content-003',
+    activityId: '3/13',
+    sequence: 3,
     format: 'Question',
     title: 'In a group of bystanders, which statement is the clearest way to activate emergency help?',
     prompt: '',
@@ -144,27 +90,9 @@ window.HCTK_CONTENT_BANK = [
     citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   },
   {
-    id: 'content-007',
-    activityId: '7/26',
-    sequence: 7,
-    format: 'Fact',
-    title: 'Bleeding control works best when treatment is aimed at the actual source.',
-    prompt: 'Clothing or objects can hide the wound. Expose enough of the area to see where blood is coming from and place pressure or equipment directly where it is needed.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '4',
-    citationReferences: 'Mayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
-  },
-  {
-    id: 'content-008',
-    activityId: '8/26',
-    sequence: 8,
+    id: 'content-004',
+    activityId: '4/13',
+    sequence: 4,
     format: 'Question',
     title: 'Why should enough of the wound area be uncovered during care?',
     prompt: '',
@@ -179,32 +107,14 @@ window.HCTK_CONTENT_BANK = [
       'To decide whether the person is embarrassed'
     ],
     correctIndex: 1,
-    rationale: 'A: The purpose is not appearance.\nB: Exposure helps the responder treat the true bleeding site.\nC: Do not delay bleeding control by trying to fully clean the wound.\nD: Privacy matters, but bleeding control and correct placement are the key goals.',
+    rationale: 'A: The purpose is not appearance.\nB: Clothing or objects can hide the wound, so exposing enough of the area helps the responder identify and treat the true bleeding site.\nC: Do not delay bleeding control by trying to fully clean the wound.\nD: Privacy matters, but bleeding control and correct placement are the key goals.',
     citationNumbers: '4',
     citationReferences: 'Mayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   },
   {
-    id: 'content-009',
-    activityId: '9/26',
-    sequence: 9,
-    format: 'Fact',
-    title: 'Direct pressure means pressure on the bleeding source.',
-    prompt: 'Use your hands, gauze, or a clean cloth to press firmly over the bleeding site. Pressure beside the wound may not compress the bleeding vessel.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '2, 4',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
-  },
-  {
-    id: 'content-010',
-    activityId: '10/26',
-    sequence: 10,
+    id: 'content-005',
+    activityId: '5/13',
+    sequence: 5,
     format: 'Question',
     title: 'Where should direct pressure be applied?',
     prompt: '',
@@ -219,32 +129,14 @@ window.HCTK_CONTENT_BANK = [
       'Only after a tourniquet is placed'
     ],
     correctIndex: 1,
-    rationale: 'A: Pressure away from the source may not control the bleeding.\nB: Pressure needs to compress the bleeding site.\nC: Joints are not the target for direct pressure.\nD: Direct pressure can be the first active bleeding-control step and can continue while preparing other care.',
+    rationale: 'A: Pressure away from the source may not control the bleeding.\nB: Pressure needs to compress the bleeding site. Use your hands, gauze, or a clean cloth to press firmly over the bleeding site.\nC: Joints are not the target for direct pressure.\nD: Direct pressure can be the first active bleeding-control step and can continue while preparing other care.',
     citationNumbers: '2, 4',
     citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   },
   {
-    id: 'content-011',
-    activityId: '11/26',
-    sequence: 11,
-    format: 'Fact',
-    title: 'Keep pressure steady on the bleeding site.',
-    prompt: 'After firm pressure is applied, keep it in place while preparing the next step or waiting for help. If material becomes soaked, add more on top instead of removing the original layer.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '2, 4',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
-  },
-  {
-    id: 'content-012',
-    activityId: '12/26',
-    sequence: 12,
+    id: 'content-006',
+    activityId: '6/13',
+    sequence: 6,
     format: 'Question',
     title: 'While preparing packing material, what should happen to pressure on the wound?',
     prompt: '',
@@ -253,38 +145,20 @@ window.HCTK_CONTENT_BANK = [
     mediaAlt: '',
     image: '',
     choices: [
-      'It should be maintained if possible',
+      'It should be maintained',
       'It should be removed so the wound can air out',
       'It should be stopped because packing replaces pressure',
       'It should be applied only to the person’s clothing'
     ],
     correctIndex: 0,
-    rationale: 'A: Maintaining pressure reduces ongoing blood loss during transition.\nB: Airing out the wound does not control bleeding.\nC: Packing does not remove the need for pressure.\nD: Pressure should target the bleeding source, not just clothing.',
+    rationale: 'A: Maintaining firm, steady pressure reduces ongoing blood loss while preparing packing material or waiting for help.\nB: Airing out the wound does not control bleeding.\nC: Packing does not remove the need for pressure.\nD: Pressure should target the bleeding source, not just clothing.',
     citationNumbers: '2, 4',
     citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   },
   {
-    id: 'content-013',
-    activityId: '13/26',
-    sequence: 13,
-    format: 'Fact',
-    title: 'Wound packing is for wounds with a space that can be filled with material.',
-    prompt: 'For a deep, compressible bleeding wound, place gauze or clean cloth into the wound space at the bleeding source, then hold firm pressure over the packed wound.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '1, 2',
-    citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external'
-  },
-  {
-    id: 'content-014',
-    activityId: '14/26',
-    sequence: 14,
+    id: 'content-007',
+    activityId: '7/13',
+    sequence: 7,
     format: 'Question',
     title: 'Which action best describes wound packing?',
     prompt: '',
@@ -299,32 +173,14 @@ window.HCTK_CONTENT_BANK = [
       'Removing all material every few seconds to inspect the wound'
     ],
     correctIndex: 1,
-    rationale: 'A: Loose surface coverage may not create pressure at the bleeding source.\nB: Packing fills the wound space and pressure helps control bleeding.\nC: Tourniquets are for limbs, not the chest.\nD: Repeated removal interrupts pressure and can worsen bleeding control.',
+    rationale: 'A: Loose surface coverage may not create pressure at the bleeding source.\nB: For a deep, compressible bleeding wound, fill the wound space at the bleeding source with gauze or clean cloth, then hold firm pressure over the packed wound to help control bleeding.\nC: Tourniquets are for limbs, not the chest.\nD: Repeated removal interrupts pressure and can worsen bleeding control.',
     citationNumbers: '1, 2',
     citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external'
   },
   {
-    id: 'content-015',
-    activityId: '15/26',
-    sequence: 15,
-    format: 'Fact',
-    title: 'After packing a wound, keep firm pressure on it.',
-    prompt: 'Packing helps only if pressure is maintained over the packed wound. Do not remove the packing. Keep pressure in place until medical responders take over.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '2, 4',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
-  },
-  {
-    id: 'content-016',
-    activityId: '16/26',
-    sequence: 16,
+    id: 'content-008',
+    activityId: '8/13',
+    sequence: 8,
     format: 'Question',
     title: 'What does it mean if blood is still visible through packed material?',
     prompt: '',
@@ -339,32 +195,14 @@ window.HCTK_CONTENT_BANK = [
       'The responder should stop care and wait'
     ],
     correctIndex: 2,
-    rationale: 'A: Blood still coming through the packing suggests bleeding is not controlled.\nB: Removing packing can disrupt pressure and worsen bleeding.\nC: Ongoing bleeding means more bleeding-control action is needed.\nD: Stopping care can allow continued blood loss.',
-    citationNumbers: '1, 2',
-    citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external'
+    rationale: 'A: Blood still coming through the packing suggests bleeding is not controlled.\nB: Removing packing can disrupt pressure and worsen bleeding.\nC: Ongoing bleeding means more bleeding control is needed. Keep pressure in place until medical responders take over.\nD: Stopping care can allow continued blood loss.',
+    citationNumbers: '1, 2, 4',
+    citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   },
   {
-    id: 'content-017',
-    activityId: '17/26',
-    sequence: 17,
-    format: 'Fact',
-    title: 'A tourniquet is used for severe bleeding from an arm or leg.',
-    prompt: 'Use a tourniquet for life-threatening limb bleeding when direct pressure is not enough or the situation requires rapid limb bleeding control. Do not place a tourniquet on the chest, abdomen, neck, scalp, or groin.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '1, 3',
-    citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
-  },
-  {
-    id: 'content-018',
-    activityId: '18/26',
-    sequence: 18,
+    id: 'content-009',
+    activityId: '9/13',
+    sequence: 9,
     format: 'Question',
     title: 'Which injury is most appropriate for a tourniquet?',
     prompt: '',
@@ -379,32 +217,14 @@ window.HCTK_CONTENT_BANK = [
       'A shallow scrape on the hand'
     ],
     correctIndex: 0,
-    rationale: 'A: Tourniquets are designed for severe arm or leg bleeding.\nB: A tourniquet cannot be properly applied to the abdomen.\nC: A tourniquet cannot be properly applied to the neck.\nD: A shallow scrape usually does not require a tourniquet.',
+    rationale: 'A: Use a tourniquet for life-threatening bleeding from an arm or leg when direct pressure is not enough or rapid bleeding control is needed. Do not place a tourniquet on the chest, abdomen, neck, scalp, or groin.\nB: A tourniquet cannot be properly applied to the abdomen.\nC: A tourniquet cannot be properly applied to the neck.\nD: A shallow scrape usually does not require a tourniquet.',
     citationNumbers: '1, 3',
     citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
   },
   {
-    id: 'content-019',
-    activityId: '19/26',
-    sequence: 19,
-    format: 'Fact',
-    title: 'Place the tourniquet above the bleeding wound on the injured limb.',
-    prompt: 'Put the tourniquet between the wound and the torso. Do not place it over a joint.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '3',
-    citationReferences: 'American Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
-  },
-  {
-    id: 'content-020',
-    activityId: '20/26',
-    sequence: 20,
+    id: 'content-010',
+    activityId: '10/13',
+    sequence: 10,
     format: 'Question',
     title: 'For severe bleeding from the forearm, where should the tourniquet go?',
     prompt: '',
@@ -424,27 +244,9 @@ window.HCTK_CONTENT_BANK = [
     citationReferences: 'American Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
   },
   {
-    id: 'content-021',
-    activityId: '21/26',
-    sequence: 21,
-    format: 'Fact',
-    title: 'Remove slack before tightening the tourniquet.',
-    prompt: 'Pull the strap snug around the limb before the final tightening step. A loose strap may not stop severe bleeding.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '3',
-    citationReferences: 'American Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
-  },
-  {
-    id: 'content-022',
-    activityId: '22/26',
-    sequence: 22,
+    id: 'content-011',
+    activityId: '11/13',
+    sequence: 11,
     format: 'Question',
     title: 'If the tourniquet strap is visibly loose before final tightening, what should be done?',
     prompt: '',
@@ -459,32 +261,14 @@ window.HCTK_CONTENT_BANK = [
       'Stop the scenario because direct pressure has already been tried'
     ],
     correctIndex: 1,
-    rationale: 'A: A loose tourniquet may not control bleeding.\nB: Removing slack improves the chance that final tightening will be effective.\nC: A joint is not an appropriate placement site.\nD: Persistent severe bleeding still requires continued action.',
-    citationNumbers: '3',
-    citationReferences: 'American Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
-  },
-  {
-    id: 'content-023',
-    activityId: '23/26',
-    sequence: 23,
-    format: 'Fact',
-    title: 'Tighten the tourniquet until the bleeding stops.',
-    prompt: 'A properly tightened tourniquet can be painful. Do not loosen it because of pain; loosening can allow severe bleeding to continue.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
+    rationale: 'A: A loose tourniquet may not control bleeding.\nB: Removing slack improves the chance that final tightening will be effective. Tighten the tourniquet until the bleeding stops.\nC: A joint is not an appropriate placement site.\nD: Persistent severe bleeding still requires continued action.',
     citationNumbers: '1, 3',
     citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
   },
   {
-    id: 'content-024',
-    activityId: '24/26',
-    sequence: 24,
+    id: 'content-012',
+    activityId: '12/13',
+    sequence: 12,
     format: 'Question',
     title: 'A person says the tourniquet hurts after it is applied for severe limb bleeding. What should the responder do?',
     prompt: '',
@@ -504,27 +288,9 @@ window.HCTK_CONTENT_BANK = [
     citationReferences: 'Hewett Brumberg EK, Douma MJ, Alibertis K, et al. 2024 American Heart Association and American Red Cross guidelines for first aid. Circulation. 2024;150(24):e519-e579. doi:10.1161/CIR.0000000000001281\nAmerican Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
   },
   {
-    id: 'content-025',
-    activityId: '25/26',
-    sequence: 25,
-    format: 'Fact',
-    title: 'Tell EMS when the tourniquet was applied and what care was given.',
-    prompt: 'Record or remember the application time. When EMS arrives, report the time, where the tourniquet was placed, and any pressure or packing already used.',
-    mediaType: '',
-    mediaPath: '',
-    mediaAlt: '',
-    image: '',
-    choices: [
-    ],
-    correctIndex: 0,
-    rationale: '',
-    citationNumbers: '2, 3',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nAmerican Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
-  },
-  {
-    id: 'content-026',
-    activityId: '26/26',
-    sequence: 26,
+    id: 'content-013',
+    activityId: '13/13',
+    sequence: 13,
     format: 'Question',
     title: 'Which handoff detail is most important after applying a tourniquet?',
     prompt: '',
@@ -539,8 +305,8 @@ window.HCTK_CONTENT_BANK = [
       'A guess about how much the hospital will cost'
     ],
     correctIndex: 0,
-    rationale: 'A: Time and care already provided help EMS continue treatment safely.\nB: Brand preference is not the key handoff detail.\nC: Device color does not guide medical care.\nD: Cost guesses do not help manage the bleeding emergency.',
-    citationNumbers: '2, 3',
-    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nAmerican Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet'
+    rationale: 'A: Time and care already provided help EMS continue treatment safely. Record or remember the application time. When EMS arrives, report the time, where the tourniquet was placed, and any pressure or packing already used.\nB: Brand preference is not the key handoff detail.\nC: Device color does not guide medical care.\nD: Cost guesses do not help manage the bleeding emergency.',
+    citationNumbers: '2, 3, 4',
+    citationReferences: 'American Red Cross. Bleeding, life-threatening external. American Red Cross. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/learn-first-aid/bleeding-life-threatening-external\nAmerican Red Cross. How to apply a tourniquet. American Red Cross. Published November 27, 2024. Accessed May 26, 2026. https://www.redcross.org/take-a-class/resources/articles/how-to-apply-a-tourniquet\nMayo Clinic Staff. Severe bleeding: first aid. Mayo Clinic. Published October 16, 2024. Accessed May 26, 2026. https://www.mayoclinic.org/first-aid/first-aid-severe-bleeding/basics/art-20056661'
   }
 ];

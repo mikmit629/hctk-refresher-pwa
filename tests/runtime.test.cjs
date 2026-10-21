@@ -5,7 +5,7 @@ const { boot, activityQuery, profile, testTiming } = require('./runtime-helper.c
 for (const variant of ['intervention', 'control']) {
   describe(`${variant} participant visits`, () => {
     const visit = (options = {}) => boot({ variant, ...options });
-    const expectedContent = variant === 'control' ? 'control-content-020' : 'content-020';
+    const expectedContent = variant === 'control' ? 'control-content-010' : 'content-010';
     const setupUrl = `https://example.test/hctk-refresher-pwa/${variant === 'control' ? '2/' : ''}`;
     function assertFreshSetupAfterInvalidLink(app) {
       for (const selector of ['#studyIdInput', '#followUpDateInput', '#followUpTimeInput']) {
@@ -40,9 +40,9 @@ for (const variant of ['intervention', 'control']) {
       assert.equal(fresh.nodes.get('#studyIdInput').value, '');
     });
 
-    it('loads Activity 20 without generating or reading a schedule', async () => {
+    it('loads Activity 10 without generating or reading a schedule', async () => {
       const app = await visit({ search: activityQuery() });
-      assert.equal(app.observations.visible.sequenceNumber, 20);
+      assert.equal(app.observations.visible.sequenceNumber, 10);
       assert.equal(app.observations.visible.contentId, expectedContent);
       assert.deepEqual(app.observations.replacedUrls, []);
       assert.equal(app.run('window.location.search'), activityQuery());
@@ -54,21 +54,21 @@ for (const variant of ['intervention', 'control']) {
     it('uses content sequence rather than array position', async () => {
       const app = await visit({ search: activityQuery() });
       app.run('CONTENT_BANK.reverse()');
-      assert.equal(app.run('directActivity(20).contentId'), expectedContent);
+      assert.equal(app.run('directActivity(10).contentId'), expectedContent);
     });
 
     for (const [name, overrides, now, sequence, date] of [
-      ['before first reminder', {}, '2026-05-27T15:00:00Z', 1, '2026-05-30'],
-      ['Friday night in Central Time', {}, '2026-10-10T04:59:59Z', 20, '2026-10-10'],
-      ['Saturday before 10 AM', {}, '2026-10-10T14:59:59Z', 20, '2026-10-10'],
-      ['Saturday at 10 AM', {}, '2026-10-10T15:00:00Z', 21, '2026-10-17'],
-      ['Sunday', {}, '2026-10-11T15:00:00Z', 21, '2026-10-17'],
+      ['before first reminder', {}, '2026-08-05T15:00:00Z', 1, '2026-08-08'],
+      ['Friday night in Central Time', {}, '2026-10-10T04:59:59Z', 10, '2026-10-10'],
+      ['Saturday before 10 AM', {}, '2026-10-10T14:59:59Z', 10, '2026-10-10'],
+      ['Saturday at 10 AM', {}, '2026-10-10T15:00:00Z', 11, '2026-10-17'],
+      ['Sunday', {}, '2026-10-11T15:00:00Z', 11, '2026-10-17'],
       ['Saturday enrollment starts the following week', { enrollment_date: '2026-09-12' }, '2026-09-12T12:00:00Z', 1, '2026-09-19'],
       ['spring daylight-saving change', { enrollment_date: '2026-03-02' }, '2026-03-08T08:00:00Z', 2, '2026-03-14'],
       ['fall daylight-saving change', { enrollment_date: '2026-10-26' }, '2026-11-01T07:00:00Z', 2, '2026-11-07'],
-      ['before final reminder', {}, '2026-11-21T15:59:59Z', 26, '2026-11-21'],
-      ['at final reminder', {}, '2026-11-21T16:00:00Z', null, null],
-      ['after final reminder', {}, '2026-11-22T15:00:00Z', null, null]
+      ['before final reminder', {}, '2026-10-31T14:59:59Z', 13, '2026-10-31'],
+      ['at final reminder', {}, '2026-10-31T15:00:00Z', null, null],
+      ['after final reminder', {}, '2026-11-01T15:00:00Z', null, null]
     ]) {
       it(`calculates the next Saturday reminder without a schedule: ${name}`, async () => {
         const app = await visit({ search: activityQuery(overrides), now });
@@ -76,7 +76,7 @@ for (const variant of ['intervention', 'control']) {
         assert.equal(next?.sequenceNumber ?? null, sequence);
         assert.equal(next?.date ?? null, date);
         if (next) assert.equal(next.localTime, '10:00');
-        assert.equal(app.run('state.linkedActivity.sequenceNumber'), 20);
+        assert.equal(app.run('state.linkedActivity.sequenceNumber'), 10);
         if (next) {
           assert.equal(app.nodes.get('#nextDueMeta').textContent,
             app.run('`Next activity: ${formatScheduleDateTime(nextCalendarActivity())}.`'));
@@ -88,17 +88,17 @@ for (const variant of ['intervention', 'control']) {
 
     for (const [now, sequence, dueAt] of [
       ['2026-09-08T14:59:59Z', 1, '2026-09-08T15:00:00.000Z'],
-      ['2026-09-08T15:56:59Z', 20, '2026-09-08T15:57:00.000Z'],
-      ['2026-09-08T15:57:00Z', 21, '2026-09-08T16:00:00.000Z'],
-      ['2026-09-08T16:14:59Z', 26, '2026-09-08T16:15:00.000Z'],
-      ['2026-09-08T16:15:00Z', null, null]
+      ['2026-09-08T15:26:59Z', 10, '2026-09-08T15:27:00.000Z'],
+      ['2026-09-08T15:27:00Z', 11, '2026-09-08T15:30:00.000Z'],
+      ['2026-09-08T15:35:59Z', 13, '2026-09-08T15:36:00.000Z'],
+      ['2026-09-08T15:36:00Z', null, null]
     ]) {
       it(`calculates the next accelerated reminder without a schedule: ${now}`, async () => {
         const app = await visit({ search: activityQuery(testTiming), now });
         const next = app.json('nextCalendarActivity()');
         assert.equal(next?.sequenceNumber ?? null, sequence);
         assert.equal(next?.dueAt ?? null, dueAt);
-        assert.equal(app.run('state.linkedActivity.sequenceNumber'), 20);
+        assert.equal(app.run('state.linkedActivity.sequenceNumber'), 10);
       });
     }
 
@@ -116,7 +116,7 @@ for (const variant of ['intervention', 'control']) {
     });
 
     it('recovers incomplete links to usable setup and reloads without another redirect', async () => {
-      const app = await visit({ search: '?activity=20#stale', allowSetupRedirect: true });
+      const app = await visit({ search: '?activity=10#stale', allowSetupRedirect: true });
       assertFreshSetupAfterInvalidLink(app);
       assert.equal(app.run('nextCalendarActivity()'), null);
       const fresh = await visit({ search: app.run('window.location.search') });
@@ -142,7 +142,7 @@ for (const variant of ['intervention', 'control']) {
       app.documentListeners.visibilitychange();
       assert.match(app.nodes.get('#nextDueMeta').textContent, /Sep 19, 2026/);
       assert.equal(app.observations.visible, null);
-      assert.equal(app.run('state.linkedActivity.sequenceNumber'), 20);
+      assert.equal(app.run('state.linkedActivity.sequenceNumber'), 10);
     });
 
     for (const [name, overrides, now, available] of [
@@ -162,14 +162,14 @@ for (const variant of ['intervention', 'control']) {
     }
 
     for (const [now, available] of [
-      ['2026-09-08T15:56:59Z', false],
-      ['2026-09-08T15:57:00Z', true],
+      ['2026-09-08T15:26:59Z', false],
+      ['2026-09-08T15:27:00Z', true],
       ['2026-09-08T18:00:00Z', true]
     ]) {
       it(`enforces test due time with earlier activities skipped: ${now}`, async () => {
         const app = await visit({ search: activityQuery(testTiming), now });
         assert.equal(Boolean(app.observations.visible), available);
-        if (available) assert.equal(app.observations.visible.sequenceNumber, 20);
+        if (available) assert.equal(app.observations.visible.sequenceNumber, 10);
       });
     }
 
@@ -192,7 +192,7 @@ for (const variant of ['intervention', 'control']) {
       });
     }
 
-    for (const search of ['?activity=20', '?schedule=hctk-2026-10-10-020']) {
+    for (const search of ['?activity=10', '?schedule=hctk-2026-10-10-010']) {
       it(`returns to fresh setup for incomplete legacy link ${search}`, async () => {
         const app = await visit({ search, allowSetupRedirect: true });
         assertFreshSetupAfterInvalidLink(app);
@@ -201,9 +201,9 @@ for (const variant of ['intervention', 'control']) {
 
     it('accepts supported camelCase profile and schedule aliases', async () => {
       const app = await visit({
-        search: '?activity=20&studyId=ALIAS&enrollmentDate=2026-05-27&followUpDate=2026-11-27&followUpTime=10:30&scheduleMode=production'
+        search: '?activity=10&curriculum=questions-13-v1&studyId=ALIAS&enrollmentDate=2026-08-05&followUpDate=2026-11-06&followUpTime=10:30&scheduleMode=production'
       });
-      assert.equal(app.observations.visible.sequenceNumber, 20);
+      assert.equal(app.observations.visible.sequenceNumber, 10);
       assert.equal(app.run('state.profile.studyId'), 'ALIAS');
     });
 
@@ -219,13 +219,13 @@ for (const variant of ['intervention', 'control']) {
       const url = new URL(app.observations.href);
       const fields = app.json('COMPLETION_FORM_FIELDS');
       assert.equal(url.searchParams.get(fields.studyId), 'LOCAL-A');
-      assert.equal(url.searchParams.get(fields.activityNumber), '20/26');
+      assert.equal(url.searchParams.get(fields.activityNumber), '10/13');
       assert.equal(url.searchParams.get(fields.openedFromCalendarNotification), 'Yes');
       assert.equal(url.searchParams.get(fields.completionDate), '2026-10-10');
       assert.equal(url.searchParams.get(fields.learningActivityAnswer), 'B: LOCAL ANSWER');
       const rows = app.json('buildActivityTrackingRows()');
       assert.equal(rows.length, 1);
-      assert.equal(rows[0].learning_activity_number, '20/26');
+      assert.equal(rows[0].learning_activity_number, '10/13');
       assert.equal(rows[0].learning_activity_completion_date, '2026-10-10');
       const fresh = await visit({ search: activityQuery() });
       assert.equal(fresh.run("state.events.filter(e => ['content_completed', 'question_answered'].includes(e.kind)).length"), 0);
@@ -234,12 +234,12 @@ for (const variant of ['intervention', 'control']) {
     it('keeps two participant tabs independent', async () => {
       const first = await visit({ search: activityQuery() });
       const second = await visit({
-        search: activityQuery({ study_id: 'LOCAL-B', activity: 19, enrollment_date: '2026-06-03' })
+        search: activityQuery({ study_id: 'LOCAL-B', activity: 9, enrollment_date: '2026-08-12' })
       });
       assert.equal(first.run('state.profile.studyId'), 'LOCAL-A');
       assert.equal(second.run('state.profile.studyId'), 'LOCAL-B');
-      assert.equal(first.observations.visible.sequenceNumber, 20);
-      assert.equal(second.observations.visible.sequenceNumber, 19);
+      assert.equal(first.observations.visible.sequenceNumber, 10);
+      assert.equal(second.observations.visible.sequenceNumber, 9);
     });
 
     it('rechecks eligibility after the scheduled date', async () => {
@@ -266,14 +266,14 @@ for (const variant of ['intervention', 'control']) {
       assert.equal(app.observations.visible, null);
     });
 
-    it('exports all 26 activity links and both follow-ups, and round-trips each activity', async () => {
+    it('exports all 13 activity links and both follow-ups, and round-trips each activity', async () => {
       const app = await visit({ search: activityQuery(), forbidPlan: false });
       app.run('refreshPlanForCalendarExport()');
       const calendar = app.run('makeCalendarICS()').replace(/\r\n /g, '');
-      assert.equal((calendar.match(/BEGIN:VEVENT/g) || []).length, 28);
+      assert.equal((calendar.match(/BEGIN:VEVENT/g) || []).length, 15);
       const links = [...calendar.matchAll(/URL;VALUE=URI:(https:\/\/example\.test[^\r\n]+)/g)]
         .map((match) => new URL(match[1]));
-      assert.equal(links.length, 26);
+      assert.equal(links.length, 13);
       for (const link of links) {
         const sequence = Number(link.searchParams.get('activity'));
         const due = app.run(`state.plan[${sequence - 1}].date`);
@@ -291,24 +291,24 @@ for (const variant of ['intervention', 'control']) {
           mode: 'test', testIntervalMinutes: ${minutes}, testStartedAt: '2026-11-01T05:30:00.000Z'
         }`);
         assert.deepEqual(
-          app.json('Array.from({ length: 26 }, (_, i) => directActivity(i + 1))'),
+          app.json('Array.from({ length: 13 }, (_, i) => directActivity(i + 1))'),
           app.json('generatePlan(state.profile, state.scheduleSettings)')
         );
       }
     });
 
-    it('preserves the participant URL and restores Activity 20 after an Admin preview', async () => {
+    it('preserves the participant URL and restores Activity 10 after an Admin preview', async () => {
       const app = await visit({ search: activityQuery(), forbidPlan: false });
       app.nodes.get('#adminPasswordInput').value = 'tkhcadmin';
       await app.run('unlockAdmin()');
       app.run('ensureAdminPlan()');
-      assert.equal(app.run('state.plan.length'), 26);
+      assert.equal(app.run('state.plan.length'), 13);
       const originalUrl = app.run('window.location.href');
       await app.run('selectAdminSchedule(state.plan[0].id)');
       assert.equal(app.observations.visible.sequenceNumber, 1);
       assert.equal(app.run('window.location.href'), originalUrl);
       await app.run('exitAdminMode()');
-      assert.equal(app.observations.visible.sequenceNumber, 20);
+      assert.equal(app.observations.visible.sequenceNumber, 10);
       assert.equal(app.run('window.location.href'), originalUrl);
     });
 
@@ -328,7 +328,7 @@ for (const variant of ['intervention', 'control']) {
       assert.equal(app.run('planCalls'), 0);
       app.run('refreshPlanForCalendarExport()');
       assert.equal(app.run('planCalls'), 1);
-      assert.equal((app.run('makeCalendarICS()').match(/BEGIN:VEVENT/g) || []).length, 28);
+      assert.equal((app.run('makeCalendarICS()').match(/BEGIN:VEVENT/g) || []).length, 15);
     });
 
     it('previews Admin test presets without changing the original link', async () => {
@@ -337,12 +337,12 @@ for (const variant of ['intervention', 'control']) {
       await app.run('unlockAdmin()');
       const originalUrl = app.run('window.location.href');
       await app.run("applySchedulePreset('test', 5)");
-      assert.equal(app.run('state.plan.length'), 26);
+      assert.equal(app.run('state.plan.length'), 13);
       assert.equal(app.observations.visible.sequenceNumber, 1);
       assert.equal(app.run('state.scheduleSettings.testIntervalMinutes'), 5);
       assert.equal(app.run('window.location.href'), originalUrl);
       await app.run('exitAdminMode()');
-      assert.equal(app.observations.visible.sequenceNumber, 20);
+      assert.equal(app.observations.visible.sequenceNumber, 10);
     });
   });
 }
